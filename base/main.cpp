@@ -4,17 +4,20 @@
 #include <stdexcept>
 #include <exception>
 #include "egos.h"
+#include "compiler.h"
 
 using namespace osapi;
 
-int main(void)
+int main(int argc, char **argv)
 {
-    unsigned long i = 0;
     int *ptest(nullptr);
     egos &os_api = egos::getInstance();
 
-    egos::introduceSelf();
     os_api.introduceSelf();
+
+    os_api.initialize();
+
+    os_api.parseOpts(argc, argv);
 
     try {
         //ptest = new(std::nothrow) int[10];
@@ -22,21 +25,19 @@ int main(void)
         ptest = new int[10];
     }
     catch (std::bad_alloc &e) {
-        printf("\nBad alloc error\n");
+        egos::prints("\nBad alloc error\n");
     }
-    printf("Allocating ptest(int) %p\n", ptest);
+    egos::prints("Allocating ptest(int) %p\n", ptest);
 
     delete[] ptest;
-    printf("Deleting ptest(int) %p\n", ptest);
+    egos::prints("Deleting ptest(int) %p\n", ptest);
     ptest = NULL;
 
-    printf("Finished!\n");
+    while(TRUE) {
+        os_api.waitForEvent(-1);
+    }
 
-    // force the counter to be placed into memory
-    volatile static int j = 0 ;
+    egos::prints("Finished!\n");
 
-    // Enter an infinite loop, just incrementing a counter
-    while(1)
-        j++;
     return 0 ;
 }
