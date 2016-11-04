@@ -4,7 +4,7 @@ project(ArchLib)
 
 # cpp sources
 set(CPP_SRCS
-    ${CMAKE_CURRENT_SOURCE_DIR}/os.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/egos.cpp
 )
 
 set(C_SRCS

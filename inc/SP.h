@@ -1,5 +1,5 @@
-#ifndef SP_H
-#define SP_H
+#ifndef __SP_H__
+#define __SP_H__
 
 template <typename T>
 class SP
@@ -89,4 +89,4 @@ SP<T>& SP<T>::operator= (const SP<T>& sp)
     return *this;
 }
 
-#endif // SP_H
+#endif // __SP_H__

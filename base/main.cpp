@@ -3,15 +3,18 @@
 #include <memory>
 #include <stdexcept>
 #include <exception>
-#include "os.h"
+#include "egos.h"
+
+using namespace osapi;
 
 int main(void)
 {
     unsigned long i = 0;
     int *ptest(nullptr);
-    os myos;
+    egos os_api;
 
-    myos.introduce();
+    egos::introduce();
+    os_api.introduce();
 
     try {
         //ptest = new(std::nothrow) int[10];

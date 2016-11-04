@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 project(ArchLib)
 
 set(ARCH_SRCS
-    ${CMAKE_CURRENT_SOURCE_DIR}/os.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/egos.cpp
 )
 
 set(CMAKE_CXX_FLAGS
