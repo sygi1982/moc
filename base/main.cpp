@@ -11,10 +11,10 @@ int main(void)
 {
     unsigned long i = 0;
     int *ptest(nullptr);
-    egos os_api;
+    egos &os_api = egos::getInstance();
 
-    egos::introduce();
-    os_api.introduce();
+    egos::introduceSelf();
+    os_api.introduceSelf();
 
     try {
         //ptest = new(std::nothrow) int[10];

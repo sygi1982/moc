@@ -4,8 +4,23 @@
 namespace osapi {
 
 class egos {
+    egos() {}
+
 public:
-    static void introduce(void);
+    egos(egos const&) = delete;
+    void operator=(egos const&) = delete;
+
+    static egos& getInstance()
+    {
+        static egos inst;
+        return inst;
+    }
+
+    static void introduceSelf(void);
+
+    void waitForEvent(int timeoutMsec);
+
+    void* getWorkItem();
 };
 
 }

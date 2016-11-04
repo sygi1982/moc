@@ -3,7 +3,7 @@
 
 namespace osapi {
 
-void egos::introduce(void)
+void egos::introduceSelf(void)
 {
     std::cout << "Hello from x86_64" << std::endl;
 }
