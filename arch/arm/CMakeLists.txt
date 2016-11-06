@@ -16,7 +16,7 @@ set(ARCH_SRCS ${C_SRCS} ${CPP_SRCS})
 set(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} -fmessage-length=0 -fno-builtin -ffunction-sections -fdata-sections")
 set(CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -std=c++11 -fno-implicit-templates -fexceptions -fmessage-length=0")
+    "${CMAKE_CXX_FLAGS} -std=c++11 -fexceptions -fmessage-length=0")
 set(CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} -fno-builtin -ffunction-sections -fdata-sections -frtti -funwind-tables")
 
