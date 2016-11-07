@@ -1,6 +1,7 @@
-#include "egos.h"
+#include <cstring>
 #include <vector>
 #include <string>
+#include "egos.h"
 
 namespace osapi {
 
@@ -18,13 +19,14 @@ void egos::introduceSelf(void)
     egos::prints("Hello from arm\n");
 }
 
-void egos::initialize(void)
+void egos::initialize(int &argc, char **argv)
 {
+    std::memset(reinterpret_cast<void*>(&this->opts), 0, sizeof(this->opts));
 }
 
 void egos::parseOpts(int &argc, char **argv)
 {
-    this->opts.push_back(std::string("test"));
+    this->opts.rawTokens.push_back(std::string("test"));
 }
 
 void egos::waitForEvent(int timeoutMsecs)

@@ -9,15 +9,25 @@ namespace osapi {
 class egos {
     egos() {};
 
-    std::vector<std::string> opts;
+    class options {
+    public:
+        std::vector<std::string> rawTokens;
+
+        bool verbose;
+        bool interactiveMode;
+
+        bool checkOpt(const std::string &opt);
+
+        const std::string getOptArg(const std::string &opt);
+    } opts;
+
+    void parseOpts(int &argc, char **argv);
 
 public:
     egos(egos const&) = delete;
     void operator=(egos const&) = delete;
 
-    void initialize(void);
-
-    void parseOpts(int &argc, char **argv);
+    void initialize(int &argc, char **argv);
 
     void waitForEvent(int timeoutMsec);
 

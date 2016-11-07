@@ -13,11 +13,9 @@ int main(int argc, char **argv)
     int *ptest(nullptr);
     egos &os_api = egos::getInstance();
 
+    os_api.initialize(argc, argv);
+
     os_api.introduceSelf();
-
-    os_api.initialize();
-
-    os_api.parseOpts(argc, argv);
 
     try {
         //ptest = new(std::nothrow) int[10];
