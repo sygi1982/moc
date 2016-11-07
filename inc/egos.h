@@ -15,6 +15,7 @@ class egos {
 
         bool verbose;
         bool interactiveMode;
+       // std::string ioPorts[2];
 
         bool checkOpt(const std::string &opt);
 
@@ -44,6 +45,13 @@ public:
 
     static void introduceSelf(void);
 
+    class exception {
+        int code;
+    public:
+        exception() : code(0) {;};
+        exception(int code) : code(code) {;};
+        int getCode() { return code; };
+    };
 };
 
 }

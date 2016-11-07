@@ -33,14 +33,28 @@ void egos::initialize(int &argc, char **argv)
 
 void egos::parseOpts(int &argc, char **argv)
 {
-    for(int arg = 1; arg < argc; arg++)
-    {
+    for(int arg = 1; arg < argc; arg++) {
         std::string astr(std::string(argv[arg]));
         this->opts.rawTokens.push_back(astr);
     }
 
+    if (this->opts.checkOpt("-help")) {
+        egos::prints("Usage [%s] [options]\n", argv[0]);
+        egos::prints("Options:\n");
+        egos::prints("-help    -> prints this info\n");
+        egos::prints("-verbose -> enables verbose mode\n");
+        egos::prints("-imode   -> enables interactive mode\n");
+
+        throw egos::exception();
+    }
+
     this->opts.verbose = this->opts.checkOpt("-verbose");
     this->opts.interactiveMode = this->opts.checkOpt("-imode");
+
+    if (this->opts.verbose) {
+        egos::prints("interactive mode %u\n", this->opts.interactiveMode);
+
+    }
 }
 
 const std::string egos::options::getOptArg(const std::string &opt)

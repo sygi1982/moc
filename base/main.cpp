@@ -1,8 +1,9 @@
-#include <stdio.h>
+#include <cstdlib>
 #include <new>
 #include <memory>
 #include <stdexcept>
 #include <exception>
+#include <stdio.h>
 #include "egos.h"
 #include "compiler.h"
 
@@ -13,7 +14,17 @@ int main(int argc, char **argv)
     int *ptest(nullptr);
     egos &os_api = egos::getInstance();
 
-    os_api.initialize(argc, argv);
+    try {
+        os_api.initialize(argc, argv);
+    }
+    catch (egos::exception &e) {
+        int err = e.getCode();
+
+        if (!err)
+            std::exit(0);
+        else
+            egos::prints("Unexpected error -> %u\n", err);
+    }
 
     os_api.introduceSelf();
 
@@ -37,5 +48,5 @@ int main(int argc, char **argv)
 
     egos::prints("Finished!\n");
 
-    return 0 ;
+    return 0;
 }
