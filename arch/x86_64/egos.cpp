@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include "egos.h"
+#include "egos.hpp"
 
 namespace osapi {
 

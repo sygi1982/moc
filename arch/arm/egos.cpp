@@ -1,7 +1,7 @@
 #include <cstring>
 #include <vector>
 #include <string>
-#include "egos.h"
+#include "egos.hpp"
 
 namespace osapi {
 

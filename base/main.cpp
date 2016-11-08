@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <exception>
 #include <stdio.h>
-#include "egos.h"
+#include "egos.hpp"
 #include "compiler.h"
 
 using namespace osapi;

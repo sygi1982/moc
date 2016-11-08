@@ -1,5 +1,5 @@
-#ifndef __EGOS_H__
-#define __EGOS_H__
+#ifndef __EGOS_HPP__
+#define __EGOS_HPP__
 
 #include <vector>
 #include <string>

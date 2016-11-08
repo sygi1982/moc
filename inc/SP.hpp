@@ -1,5 +1,5 @@
-#ifndef __SP_H__
-#define __SP_H__
+#ifndef __SP_HPP__
+#define __SP_HPP__
 
 template <typename T>
 class SP
