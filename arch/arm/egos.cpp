@@ -21,12 +21,10 @@ void egos::introduceSelf(void)
 
 void egos::initialize(int &argc, char **argv)
 {
-    std::memset(reinterpret_cast<void*>(&this->opts), 0, sizeof(this->opts));
 }
 
-void egos::parseOpts(int &argc, char **argv)
+void egos::parseOpts(const char *app)
 {
-    this->opts.rawTokens.push_back(std::string("test"));
 }
 
 void egos::waitForEvent(int timeoutMsecs)

@@ -2,27 +2,35 @@
 #define __EGOS_HPP__
 
 #include <vector>
+#include <map>
 #include <string>
 
 namespace osapi {
+
+enum class commPorts : uint8_t {
+    SERIAL_PORT = 0,
+    CAN_PORT = 1,
+};
 
 class egos {
     egos() {};
 
     class options {
     public:
+        options() {};
+
         std::vector<std::string> rawTokens;
 
         bool verbose;
         bool interactiveMode;
-       // std::string ioPorts[2];
+        std::map<uint8_t, std::string> ports;
 
         bool checkOpt(const std::string &opt);
 
         const std::string getOptArg(const std::string &opt);
     } opts;
 
-    void parseOpts(int &argc, char **argv);
+    void parseOpts(const char *app);
 
 public:
     egos(egos const&) = delete;

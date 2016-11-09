@@ -2,6 +2,7 @@
 #include <cstdarg>
 #include <cstring>
 #include <vector>
+#include <map>
 #include <string>
 #include <algorithm>
 #include "egos.hpp"
@@ -27,23 +28,24 @@ void egos::introduceSelf(void)
 
 void egos::initialize(int &argc, char **argv)
 {
-    std::memset(reinterpret_cast<void*>(&this->opts), 0, sizeof(this->opts));
-    this->parseOpts(argc, argv);
-}
-
-void egos::parseOpts(int &argc, char **argv)
-{
     for(int arg = 1; arg < argc; arg++) {
         std::string astr(std::string(argv[arg]));
         this->opts.rawTokens.push_back(astr);
     }
 
+    this->parseOpts(argv[0]);
+}
+
+void egos::parseOpts(const char *app)
+{
     if (this->opts.checkOpt("-help")) {
-        egos::prints("Usage [%s] [options]\n", argv[0]);
+        egos::prints("Usage [%s] [options]\n", app);
         egos::prints("Options:\n");
         egos::prints("-help    -> prints this info\n");
         egos::prints("-verbose -> enables verbose mode\n");
         egos::prints("-imode   -> enables interactive mode\n");
+        egos::prints("-serialp [serial port] -> defines serial port\n");
+        egos::prints("-canp [can port] -> defines CAN port\n");
 
         throw egos::exception();
     }
@@ -51,9 +53,33 @@ void egos::parseOpts(int &argc, char **argv)
     this->opts.verbose = this->opts.checkOpt("-verbose");
     this->opts.interactiveMode = this->opts.checkOpt("-imode");
 
+    std::string serial = this->opts.getOptArg("-serialp");
+    if (serial.empty())
+        serial = std::string("/dev/ttyS0");
+
+    this->opts.ports.insert(
+        std::pair<uint8_t, std::string>(
+            static_cast<uint8_t>(commPorts::SERIAL_PORT), serial));
+
+    std::string can = this->opts.getOptArg("-canp");
+    if (can.empty())
+        can = std::string("/dev/can0");
+
+    this->opts.ports.insert(
+        std::pair<uint8_t, std::string>(
+            static_cast<uint8_t>(commPorts::CAN_PORT), can));
+
     if (this->opts.verbose) {
         egos::prints("interactive mode %u\n", this->opts.interactiveMode);
 
+        std::map<uint8_t, std::string>::iterator port;
+        port =
+            this->opts.ports.find(static_cast<uint8_t>(commPorts::SERIAL_PORT));
+        egos::prints("serial port %s\n", port->second.c_str());
+
+        port =
+            this->opts.ports.find(static_cast<uint8_t>(commPorts::CAN_PORT));
+        egos::prints("can port %s\n", port->second.c_str());
     }
 }
 
@@ -63,7 +89,7 @@ const std::string egos::options::getOptArg(const std::string &opt)
     arg = std::find(this->rawTokens.begin(), this->rawTokens.end(), opt);
 
     return (arg != this->rawTokens.end() && ++arg != this->rawTokens.end()) ?
-         *arg : nullptr;
+         *arg : "";
 }
 
 bool egos::options::checkOpt(const std::string &opt)
