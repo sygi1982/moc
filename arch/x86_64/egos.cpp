@@ -29,7 +29,7 @@ void egos::introduceSelf(void)
 void egos::initialize(int &argc, char **argv)
 {
     for(int arg = 1; arg < argc; arg++) {
-        std::string astr(std::string(argv[arg]));
+        auto astr(std::string(argv[arg]));
         this->opts.rawTokens.push_back(astr);
     }
 
@@ -53,27 +53,29 @@ void egos::parseOpts(const char *app)
     this->opts.verbose = this->opts.checkOpt("-verbose");
     this->opts.interactiveMode = this->opts.checkOpt("-imode");
 
-    std::string serial = this->opts.getOptArg("-serialp");
+    auto serial = this->opts.getOptArg("-serialp");
     if (serial.empty())
         serial = std::string("/dev/ttyS0");
 
-    this->opts.ports.insert(
-        std::pair<uint8_t, std::string>(
-            static_cast<uint8_t>(commPorts::SERIAL_PORT), serial));
+    auto insert_val = [this]
+        (commPorts type, std::string name) {
+            this->opts.ports.insert(
+                std::pair<uint8_t, std::string>(
+                static_cast<uint8_t>(type), name));
+        };
 
-    std::string can = this->opts.getOptArg("-canp");
+    insert_val(commPorts::SERIAL_PORT, serial);
+
+    auto can = this->opts.getOptArg("-canp");
     if (can.empty())
         can = std::string("/dev/can0");
 
-    this->opts.ports.insert(
-        std::pair<uint8_t, std::string>(
-            static_cast<uint8_t>(commPorts::CAN_PORT), can));
+    insert_val(commPorts::CAN_PORT, can);
 
     if (this->opts.verbose) {
         egos::prints("interactive mode %u\n", this->opts.interactiveMode);
 
-        std::map<uint8_t, std::string>::iterator port;
-        port =
+        auto port =
             this->opts.ports.find(static_cast<uint8_t>(commPorts::SERIAL_PORT));
         egos::prints("serial port %s\n", port->second.c_str());
 
@@ -85,8 +87,7 @@ void egos::parseOpts(const char *app)
 
 const std::string egos::options::getOptArg(const std::string &opt)
 {
-    std::vector<std::string>::const_iterator arg;
-    arg = std::find(this->rawTokens.begin(), this->rawTokens.end(), opt);
+    auto arg = std::find(this->rawTokens.begin(), this->rawTokens.end(), opt);
 
     return (arg != this->rawTokens.end() && ++arg != this->rawTokens.end()) ?
          *arg : "";
