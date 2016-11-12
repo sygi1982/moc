@@ -2,8 +2,11 @@
 #define __EGOS_HPP__
 
 #include <vector>
+#include <memory>
 #include <map>
 #include <string>
+
+#include "looper.hpp"
 
 namespace osapi {
 
@@ -14,6 +17,8 @@ enum class commPorts : uint8_t {
 
 class egos {
     egos() {};
+
+    std::unique_ptr<looperIf> mainLooper;
 
     class options {
     public:
@@ -38,9 +43,7 @@ public:
 
     void initialize(int &argc, char **argv);
 
-    void waitForEvent(int timeoutMsec);
-
-    void* getWorkItem();
+    void start() { mainLooper->run(); };
 
     /* Static methods */
     static egos& getInstance()

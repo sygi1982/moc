@@ -4,8 +4,8 @@
 #include <stdexcept>
 #include <exception>
 #include <stdio.h>
+
 #include "egos.hpp"
-#include "compiler.h"
 
 using namespace osapi;
 
@@ -42,11 +42,7 @@ int main(int argc, char **argv)
     egos::prints("Deleting ptest(int) %p\n", ptest);
     ptest = NULL;
 
-    while(TRUE) {
-        os_api.waitForEvent(-1);
-    }
+    os_api.start();
 
     egos::prints("Finished!\n");
-
-    return 0;
 }

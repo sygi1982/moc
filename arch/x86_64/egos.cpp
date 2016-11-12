@@ -5,7 +5,10 @@
 #include <map>
 #include <string>
 #include <algorithm>
+#include <memory>
+
 #include "egos.hpp"
+#include "looper.hpp"
 
 namespace osapi {
 
@@ -34,6 +37,8 @@ void egos::initialize(int &argc, char **argv)
     }
 
     this->parseOpts(argv[0]);
+
+    this->mainLooper = std::unique_ptr<looper>(new looper());
 }
 
 void egos::parseOpts(const char *app)
@@ -99,15 +104,6 @@ bool egos::options::checkOpt(const std::string &opt)
 {
     return std::find(this->rawTokens.begin(), this->rawTokens.end(), opt) !=
         this->rawTokens.end();
-}
-
-void egos::waitForEvent(int timeoutMsecs)
-{
-}
-
-void* egos::getWorkItem()
-{
-    return nullptr;
 }
 
 }

@@ -1,6 +1,7 @@
 #include <cstring>
 #include <vector>
 #include <string>
+
 #include "egos.hpp"
 
 namespace osapi {
@@ -21,19 +22,11 @@ void egos::introduceSelf(void)
 
 void egos::initialize(int &argc, char **argv)
 {
+    this->mainLooper = std::unique_ptr<looper>(new looper());
 }
 
 void egos::parseOpts(const char *app)
 {
-}
-
-void egos::waitForEvent(int timeoutMsecs)
-{
-}
-
-void* egos::getWorkItem()
-{
-    return nullptr;
 }
 
 }
