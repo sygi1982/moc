@@ -73,6 +73,7 @@ void egos::parseOpts(const char *app)
     insert_val(commPorts::CAN_PORT, can);
 
     if (this->opts.verbose) {
+        egos::prints("--------------------------\n");
         egos::prints("interactive mode %u\n", this->opts.interactiveMode);
 
         auto port =
@@ -82,6 +83,7 @@ void egos::parseOpts(const char *app)
         port =
             this->opts.ports.find(static_cast<uint8_t>(commPorts::CAN_PORT));
         egos::prints("can port %s\n", port->second.c_str());
+        egos::prints("--------------------------\n");
     }
 }
 
