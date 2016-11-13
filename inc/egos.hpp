@@ -45,6 +45,8 @@ public:
 
     void start() { mainLooper->run(); };
 
+    void process() { mainLooper->post(); };
+
     /* Static methods */
     static egos& getInstance()
     {

@@ -6,6 +6,8 @@
 #include <string>
 #include <algorithm>
 #include <memory>
+#include <mutex>
+#include <condition_variable>
 
 #include "egos.hpp"
 #include "looper.hpp"
@@ -38,7 +40,9 @@ void egos::initialize(int &argc, char **argv)
 
     this->parseOpts(argv[0]);
 
-    this->mainLooper = std::unique_ptr<looper>(new looper());
+    this->mainLooper =
+        std::unique_ptr<looper<std::mutex, std::condition_variable>>(
+            new looper<std::mutex, std::condition_variable>());
 }
 
 void egos::parseOpts(const char *app)
