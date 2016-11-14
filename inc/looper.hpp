@@ -4,6 +4,7 @@
 #include <list>
 #include <string>
 #include <mutex>
+#include <cassert>
 #include <iostream>
 
 namespace osapi {
@@ -14,7 +15,7 @@ public:
     virtual ~looperIf() {};
 
     virtual void run() {};
-
+    virtual void stop() {};
     virtual void post() {};
 };
 
@@ -22,31 +23,43 @@ template <typename Tlock, typename Tsync>
 class looper : public looperIf {
 
     typedef Tlock locker;
-    locker lock;
-
     typedef Tsync syncer;
-    syncer sync;
 
+    locker lock;
+    syncer sync;
     std::list<int> queue;
+    bool stopped;
 
 public:
-    looper() {};
+    looper() : stopped(true) {};
 
     void run() {
-        while(true) {
-            std::unique_lock<locker> ul(lock);
-            std::cout << "Running !" << std::endl;
-            if (!queue.empty()) {
-                auto item = queue.front();
-                queue.pop_front();
-            }
+        assert(stopped == true);
+        stopped = false;
 
-            sync.wait(ul);
+        while(!stopped) {
+            lock.lock();
+            std::cout << "Running !" << std::endl;
+            while (queue.empty()) {
+                  std::unique_lock<locker> ul(lock);
+                  sync.wait(ul);
+            }
+            auto item = queue.front();
+            queue.pop_front();
+            lock.unlock();
         }
     };
 
+    void stop() {
+         std::lock_guard<locker> lg(lock);
+
+         stopped = true;
+         sync.notify_all();
+    }
+
     void post() {
          std::lock_guard<locker> lg(lock);
+
          queue.push_back(0);
          sync.notify_all();
          std::cout << "Post item !" << std::endl;

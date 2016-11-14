@@ -42,6 +42,7 @@ int main(int argc, char **argv)
     egos::prints("Deleting ptest(int) %p\n", ptest);
     ptest = NULL;
 
+    os_api.process();
     os_api.start();
 
     egos::prints("Finished!\n");
