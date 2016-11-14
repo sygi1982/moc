@@ -13,6 +13,6 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DTARGET_ARCH=x86_64 ..  or
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../arch/arm/cross.cmake -DTARGET_ARCH=arm -DTARGET_PLAT=lpc17xx ..
 make;
 
-# Deploy
+# Deploy for embedded target
 
 make deploy ISP_PORT=ttyS1
