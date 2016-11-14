@@ -4,6 +4,7 @@
 #include <list>
 #include <string>
 #include <mutex>
+#include <memory>
 #include <cassert>
 #include <iostream>
 
@@ -17,7 +18,7 @@ public:
 
     virtual void run() {};
     virtual void stop() {};
-    virtual void post(Titem& item) {};
+    virtual void post(std::shared_ptr<Titem> &item) {};
 };
 
 template <typename Tlock, typename Tsync, typename Titem>
@@ -28,7 +29,7 @@ class looper : public looperIf<Titem> {
 
     locker lock;
     syncer sync;
-    std::list<Titem> queue;
+    std::list<std::shared_ptr<Titem>> queue;
     bool stopped;
 
 public:
@@ -40,11 +41,11 @@ public:
 
         while(!stopped) {
             lock.lock();
-            std::cout << "Running !" << std::endl;
             while (queue.empty()) {
                   sync.wait(lock);
             }
             auto item = queue.front();
+            std::cout << "Running " << item->id << std::endl;
             queue.pop_front();
             lock.unlock();
         }
@@ -58,12 +59,12 @@ public:
          sync.wake();
     };
 
-    void post(Titem& item) {
+    void post(std::shared_ptr<Titem> &item) {
          std::lock_guard<locker> lg(lock);
 
          queue.push_back(item);
          sync.wake();
-         std::cout << "Post item !" << std::endl;
+         std::cout << "Post item " << item->id << std::endl;
     };
 };
 

@@ -46,7 +46,7 @@ public:
 
     void start() { mainLooper->run(); };
 
-    void process(workitem& item) { mainLooper->post(item); };
+    void process(std::shared_ptr<workitem> &item) { mainLooper->post(item); };
 
     /* Static methods */
     static egos& getInstance()

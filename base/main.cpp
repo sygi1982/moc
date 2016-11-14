@@ -42,8 +42,8 @@ int main(int argc, char **argv)
     egos::prints("Deleting ptest(int) %p\n", ptest);
     ptest = NULL;
 
-    workitem item;
-    item.id = 1;
+    std::shared_ptr<workitem> item(new workitem());
+    item->id = 1;
     os_api.process(item);
     os_api.start();
 
