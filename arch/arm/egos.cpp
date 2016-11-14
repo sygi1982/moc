@@ -3,6 +3,11 @@
 #include <string>
 
 #include "egos.hpp"
+#include "looper.hpp"
+#include "workitem.hpp"
+
+#include "locker.hpp"
+#include "syncer.hpp"
 
 namespace osapi {
 
@@ -15,17 +20,19 @@ void egos::prints(const char *fmt, ...)
     debug_print(fmt);
 }
 
-void egos::introduceSelf(void)
+void egos::introduce_self(void)
 {
     egos::prints("Hello from arm\n");
 }
 
 void egos::initialize(int &argc, char **argv)
 {
-    this->mainLooper = std::unique_ptr<looper>(new looper());
+    main_looper =
+        std::unique_ptr<looper<locker, syncer<locker>, workitem>>(
+            new looper<locker, syncer<locker>, workitem>);
 }
 
-void egos::parseOpts(const char *app)
+void egos::parse_opts(const char *app)
 {
 }
 

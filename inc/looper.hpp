@@ -11,10 +11,10 @@
 namespace osapi {
 
 template <typename Titem>
-class looperIf {
+class looper_if {
 
 public:
-    virtual ~looperIf() {};
+    virtual ~looper_if() {};
 
     virtual void run() {};
     virtual void stop() {};
@@ -22,7 +22,7 @@ public:
 };
 
 template <typename Tlock, typename Tsync, typename Titem>
-class looper : public looperIf<Titem> {
+class looper : public looper_if<Titem> {
 
     typedef Tlock locker;
     typedef Tsync syncer;

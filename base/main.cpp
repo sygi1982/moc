@@ -12,13 +12,13 @@ using namespace osapi;
 int main(int argc, char **argv)
 {
     int *ptest(nullptr);
-    egos &os_api = egos::getInstance();
+    egos &os_api = egos::get_instance();
 
     try {
         os_api.initialize(argc, argv);
     }
     catch (egos::exception &e) {
-        int err = e.getCode();
+        int err = e.get_code();
 
         if (!err)
             std::exit(0);
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
             egos::prints("Unexpected error -> %u\n", err);
     }
 
-    os_api.introduceSelf();
+    os_api.introduce_self();
 
     try {
         //ptest = new(std::nothrow) int[10];

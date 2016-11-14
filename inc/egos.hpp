@@ -11,7 +11,7 @@
 
 namespace osapi {
 
-enum class commPorts : uint8_t {
+enum class comm_ports : uint8_t {
     SERIAL_PORT = 0,
     CAN_PORT = 1,
 };
@@ -19,24 +19,24 @@ enum class commPorts : uint8_t {
 class egos {
     egos() {};
 
-    std::unique_ptr<looperIf<workitem>> mainLooper;
+    std::unique_ptr<looper_if<workitem>> main_looper;
 
     class options {
     public:
         options() {};
 
-        std::vector<std::string> rawTokens;
+        std::vector<std::string> raw_tokens;
 
         bool verbose;
-        bool interactiveMode;
+        bool interactive_mode;
         std::map<uint8_t, std::string> ports;
 
-        bool checkOpt(const std::string &opt);
+        bool check_opt(const std::string &opt);
 
-        const std::string getOptArg(const std::string &opt);
+        const std::string get_opt_arg(const std::string &opt);
     } opts;
 
-    void parseOpts(const char *app);
+    void parse_opts(const char *app);
 
 public:
     egos(egos const&) = delete;
@@ -44,12 +44,12 @@ public:
 
     void initialize(int &argc, char **argv);
 
-    void start() { mainLooper->run(); };
+    void start() { main_looper->run(); };
 
-    void process(std::shared_ptr<workitem> &item) { mainLooper->post(item); };
+    void process(std::shared_ptr<workitem> &item) { main_looper->post(item); };
 
     /* Static methods */
-    static egos& getInstance()
+    static egos& get_instance()
     {
         static egos inst;
         return inst;
@@ -57,14 +57,14 @@ public:
 
     static void prints(const char *fmt, ...);
 
-    static void introduceSelf(void);
+    static void introduce_self(void);
 
     class exception {
         int code;
     public:
         exception() : code(0) {;};
         exception(int code) : code(code) {;};
-        int getCode() { return code; };
+        int get_code() { return code; };
     };
 };
 

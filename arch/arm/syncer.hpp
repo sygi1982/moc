@@ -3,12 +3,13 @@
 
 namespace osapi {
 
+template <typename Tlock>
 class syncer {
 
 public:
     syncer() {};
 
-    void wait() {
+    void wait(Tlock& lock) {
         // call asm("WFI")
     };
 

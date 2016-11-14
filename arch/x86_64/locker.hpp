@@ -19,7 +19,7 @@ public:
         mutex.unlock();
     };
 
-    std::mutex& getRaw() {
+    std::mutex& get_raw() {
         return mutex;
     }
 };

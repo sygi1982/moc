@@ -12,7 +12,7 @@ public:
         // TODO: disable interrupts
     };
 
-    void unlock {
+    void unlock() {
         // TODO: enable interrupts
     };
 };

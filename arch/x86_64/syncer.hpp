@@ -14,7 +14,7 @@ public:
     syncer() {};
 
     void wait(Tlock& lock) {
-        std::unique_lock<std::mutex> ul(lock.getRaw());
+        std::unique_lock<std::mutex> ul(lock.get_raw());
         cond.wait(ul);
     };
 
