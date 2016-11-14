@@ -1,3 +1,19 @@
+/*
+ *   Copyright (C) 2016 Grzegorz Sygieda
+ *
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "ft245.h"
 #include "compiler.h"
 #include <NXP/LPC17xx/LPC17xx.h>
@@ -105,11 +121,11 @@ void ft245_init(void)
 
 /*
  PWREN#-Output Goes low after the device is con.gured by USB, then high during USB suspend. 
- RD#  - Input. Enables the current FIFO data byte on D0...D7 when low. 
-        Fetched the next FIFO data byte (if available) from the receive 
+ RD#  - Input. Enables the current FIFO data byte on D0...D7 when low.
+        Fetched the next FIFO data byte (if available) from the receive
         FIFO buffer when RD# goes from high to low.
  WR   - Input Writes the data byte on the D0...D7 pins into the transmit FIFO
-        buffer when WR goes from high to low. 
+        buffer when WR goes from high to low.
  TXE# - Output When high, do not write data into the FIFO.
          When low, data can be written into the FIFO by strobing WR high,then low.
  RXF# -  Output When high, do not read data from the FIFO. When low, there is data available
