@@ -7,10 +7,13 @@
 #include <algorithm>
 #include <memory>
 #include <mutex>
-#include <condition_variable>
 
 #include "egos.hpp"
 #include "looper.hpp"
+#include "workitem.hpp"
+
+#include "locker.hpp"
+#include "syncer.hpp"
 
 namespace osapi {
 
@@ -41,8 +44,8 @@ void egos::initialize(int &argc, char **argv)
     this->parseOpts(argv[0]);
 
     this->mainLooper =
-        std::unique_ptr<looper<std::mutex, std::condition_variable>>(
-            new looper<std::mutex, std::condition_variable>());
+        std::unique_ptr<looper<locker, syncer<locker>, workitem>>(
+            new looper<locker, syncer<locker>, workitem>);
 }
 
 void egos::parseOpts(const char *app)

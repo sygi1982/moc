@@ -7,6 +7,7 @@
 #include <string>
 
 #include "looper.hpp"
+#include "workitem.hpp"
 
 namespace osapi {
 
@@ -18,7 +19,7 @@ enum class commPorts : uint8_t {
 class egos {
     egos() {};
 
-    std::unique_ptr<looperIf> mainLooper;
+    std::unique_ptr<looperIf<workitem>> mainLooper;
 
     class options {
     public:
@@ -45,7 +46,7 @@ public:
 
     void start() { mainLooper->run(); };
 
-    void process() { mainLooper->post(); };
+    void process(workitem& item) { mainLooper->post(item); };
 
     /* Static methods */
     static egos& getInstance()

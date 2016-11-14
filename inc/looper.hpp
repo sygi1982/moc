@@ -9,6 +9,7 @@
 
 namespace osapi {
 
+template <typename Titem>
 class looperIf {
 
 public:
@@ -16,18 +17,18 @@ public:
 
     virtual void run() {};
     virtual void stop() {};
-    virtual void post() {};
+    virtual void post(Titem& item) {};
 };
 
-template <typename Tlock, typename Tsync>
-class looper : public looperIf {
+template <typename Tlock, typename Tsync, typename Titem>
+class looper : public looperIf<Titem> {
 
     typedef Tlock locker;
     typedef Tsync syncer;
 
     locker lock;
     syncer sync;
-    std::list<int> queue;
+    std::list<Titem> queue;
     bool stopped;
 
 public:
@@ -41,8 +42,7 @@ public:
             lock.lock();
             std::cout << "Running !" << std::endl;
             while (queue.empty()) {
-                  std::unique_lock<locker> ul(lock);
-                  sync.wait(ul);
+                  sync.wait(lock);
             }
             auto item = queue.front();
             queue.pop_front();
@@ -54,14 +54,15 @@ public:
          std::lock_guard<locker> lg(lock);
 
          stopped = true;
-         sync.notify_all();
-    }
+         queue.clear();
+         sync.wake();
+    };
 
-    void post() {
+    void post(Titem& item) {
          std::lock_guard<locker> lg(lock);
 
-         queue.push_back(0);
-         sync.notify_all();
+         queue.push_back(item);
+         sync.wake();
          std::cout << "Post item !" << std::endl;
     };
 };

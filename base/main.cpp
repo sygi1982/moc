@@ -42,7 +42,9 @@ int main(int argc, char **argv)
     egos::prints("Deleting ptest(int) %p\n", ptest);
     ptest = NULL;
 
-    os_api.process();
+    workitem item;
+    item.id = 1;
+    os_api.process(item);
     os_api.start();
 
     egos::prints("Finished!\n");

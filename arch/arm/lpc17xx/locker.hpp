@@ -6,18 +6,15 @@ namespace osapi {
 class locker {
 
 public:
-    looper() {};
+    locker() {};
 
     void lock() {
         // TODO: disable interrupts
-
-    }
+    };
 
     void unlock {
         // TODO: enable interrupts
-
-    }
-
+    };
 };
 
 }
