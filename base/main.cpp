@@ -27,13 +27,11 @@ using namespace osapi;
 
 int main(int argc, char **argv)
 {
-    int *ptest(nullptr);
     egos &os_api = egos::get_instance();
 
     try {
         os_api.initialize(argc, argv);
-    }
-    catch (egos::exception &e) {
+    } catch (egos::exception &e) {
         int err = e.get_code();
 
         if (!err)
@@ -45,22 +43,12 @@ int main(int argc, char **argv)
     os_api.introduce_self();
 
     try {
-        //ptest = new(std::nothrow) int[10];
-        //ptest = new int[10000];
-        ptest = new int[10];
-    }
-    catch (std::bad_alloc &e) {
+        std::shared_ptr<workitem> item(new workitem());
+        item->id = 1;
+        os_api.process(item);
+    } catch (std::bad_alloc &e) {
         egos::prints("\nBad alloc error\n");
     }
-    egos::prints("Allocating ptest(int) %p\n", ptest);
-
-    delete[] ptest;
-    egos::prints("Deleting ptest(int) %p\n", ptest);
-    ptest = NULL;
-
-    std::shared_ptr<workitem> item(new workitem());
-    item->id = 1;
-    os_api.process(item);
     os_api.start();
 
     egos::prints("Finished!\n");

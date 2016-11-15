@@ -25,10 +25,12 @@
 
 namespace osapi {
 
-typedef struct _workitem {
+class workitem {
+public:
     int id;
-
-} workitem;
+    workitem() { std::cout << "workitem()" << std::endl; };
+    ~workitem() { std::cout << " ~workitem()" << std::endl; };
+};
 
 }
 
