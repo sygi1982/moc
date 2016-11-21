@@ -26,10 +26,28 @@
 namespace osapi {
 
 class workitem {
-public:
     int id;
-    workitem() { std::cout << "workitem()" << std::endl; };
-    ~workitem() { std::cout << " ~workitem()" << std::endl; };
+
+public:
+    workitem(int id) : id(id) {
+        std::cout << "workitem(" << id << ")" << std::endl;
+    };
+
+    virtual ~workitem() {
+        std::cout << " ~workitem(" << id << ")" << std::endl;
+    };
+
+    virtual bool utilize() {
+        std::cout << " workitem(" << id << ") utilize" << std::endl;
+        return false;
+    };
+
+    int get_id() const {
+        return id;
+    };
+
+    virtual int get_type() const { return -1; };
+
 };
 
 }

@@ -61,7 +61,8 @@ public:
                   sync.wait(lock);
             }
             auto item = queue.front();
-            std::cout << "Running " << item->id << std::endl;
+            std::cout << "Running " << item->get_id() << std::endl;
+            item->utilize();
             queue.pop_front();
             lock.unlock();
         }
@@ -80,7 +81,7 @@ public:
 
          queue.push_back(item);
          sync.wake();
-         std::cout << "Post item " << item->id << std::endl;
+         std::cout << "Post item " << item->get_id() << std::endl;
     };
 };
 

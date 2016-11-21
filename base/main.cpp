@@ -43,8 +43,7 @@ int main(int argc, char **argv)
     os_api.introduce_self();
 
     try {
-        std::shared_ptr<workitem> item(new workitem());
-        item->id = 1;
+        std::shared_ptr<workitem> item(new workitem(1));
         os_api.process(item);
     } catch (std::bad_alloc &e) {
         egos::prints("\nBad alloc error\n");
