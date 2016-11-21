@@ -7,7 +7,7 @@ set(ARCH_SRCS
 )
 
 set(CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -std=c++11 -fexceptions -fmessage-length=0")
+    "${CMAKE_CXX_FLAGS} -pthread -std=c++11 -fexceptions -fmessage-length=0")
 set(CMAKE_CXX_FLAGS
    "${CMAKE_CXX_FLAGS} -fno-builtin -ffunction-sections -fdata-sections -frtti -funwind-tables")
 

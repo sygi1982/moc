@@ -48,6 +48,11 @@ void egos::initialize(int &argc, char **argv)
             new looper<locker, syncer<locker>, workitem>);
 }
 
+void egos::start()
+{
+    main_looper->run();
+};
+
 void egos::parse_opts(const char *app)
 {
 }

@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <memory>
 #include <mutex>
+#include <thread>
 
 #include "egos.hpp"
 #include "looper.hpp"
@@ -63,6 +64,12 @@ void egos::initialize(int &argc, char **argv)
         std::unique_ptr<looper<locker, syncer<locker>, workitem>>(
             new looper<locker, syncer<locker>, workitem>);
 }
+
+void egos::start()
+{
+    std::thread looper([this]() { main_looper->run(); });
+    looper.join();
+};
 
 void egos::parse_opts(const char *app)
 {

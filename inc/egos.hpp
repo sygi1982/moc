@@ -60,9 +60,11 @@ public:
 
     void initialize(int &argc, char **argv);
 
-    void start() { main_looper->run(); };
+    void start();
 
-    void process(std::shared_ptr<workitem> &item) { main_looper->post(item); };
+    void process(std::shared_ptr<workitem> &item) {
+        main_looper->post(item);
+    };
 
     /* Static methods */
     static egos& get_instance()
