@@ -17,7 +17,11 @@
 #ifndef __LOCKER_HPP__
 #define __LOCKER_HPP__
 
+#include "irqmgr.hpp"
+
 namespace osapi {
+
+using namespace halapi;
 
 class locker {
 
@@ -25,11 +29,11 @@ public:
     locker() {};
 
     void lock() {
-        // TODO: disable interrupts
+        irqmgr::ints_dis();
     };
 
     void unlock() {
-        // TODO: enable interrupts
+        irqmgr::ints_ena();
     };
 };
 

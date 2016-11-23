@@ -14,27 +14,28 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __SYNCER_HPP__
-#define __SYNCER_HPP__
+#ifndef __IRQMGR_HPP__
+#define __IRQMGR_HPP__
 
-#include "irqmgr.hpp"
+namespace halapi {
 
-namespace osapi {
-
-using namespace halapi;
-
-template <typename Tlock>
-class syncer {
+class irqmgr {
+    explicit irqmgr() {};
 
 public:
-    syncer() {};
-
-    void wait(Tlock& lock) {
-        irqmgr::wfi();
+    static void register_int() {
     };
 
-    void wake() {
-        // nothing to do
+    static void ints_ena() {
+        // TODO: enable interrupts
+    };
+
+    static void ints_dis() {
+        // TODO: disable interrupts
+    };
+
+    static void wfi() {
+        // TODO: wait for interrupt
     };
 
 };
