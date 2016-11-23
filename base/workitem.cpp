@@ -14,27 +14,34 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __WORKITEM_HPP__
-#define __WORKITEM_HPP__
+#include "egos.hpp"
 
 namespace osapi {
 
-class workitem {
-    int id;
+workitem::workitem(int id) : id(id)
+{
+    egos::prints("workitem %u\n", id);
+};
 
-public:
-    workitem(int id);
+workitem::~workitem()
+{
+    egos::prints(" ~workitem %u\n", id);
+};
 
-    virtual ~workitem();
+bool workitem::utilize()
+{
+    egos::prints(" workitem %u utilize\n", id);
+    return false;
+};
 
-    virtual bool utilize();
+int workitem::get_id() const
+{
+    return id;
+};
 
-    int get_id() const;
-
-    virtual int get_type() const;
-
+int workitem::get_type() const
+{
+    return -1;
 };
 
 }
-
-#endif

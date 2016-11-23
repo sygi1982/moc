@@ -18,11 +18,9 @@
 #define __LOOPER_HPP__
 
 #include <list>
-#include <string>
 #include <mutex>
 #include <memory>
 #include <cassert>
-#include <iostream>
 
 namespace osapi {
 
@@ -57,13 +55,14 @@ public:
 
         while(!stopped) {
             lock.lock();
-            while (queue.empty()) {
-                  sync.wait(lock);
-            }
+
+            while (queue.empty())
+                sync.wait(lock);
+
             auto item = queue.front();
-            std::cout << "Running " << item->get_id() << std::endl;
             item->utilize();
             queue.pop_front();
+
             lock.unlock();
         }
     };
@@ -81,7 +80,6 @@ public:
 
          queue.push_back(item);
          sync.wake();
-         std::cout << "Post item " << item->get_id() << std::endl;
     };
 };
 

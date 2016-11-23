@@ -136,5 +136,4 @@ bool egos::options::check_opt(const std::string &opt)
         raw_tokens.end();
 }
 
-
 }
