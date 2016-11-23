@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 #include "egos.hpp"
+#include "timerpool.hpp"
 
 using namespace osapi;
 
