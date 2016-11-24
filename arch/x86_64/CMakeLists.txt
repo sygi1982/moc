@@ -4,6 +4,7 @@ project(ArchLib)
 
 set(ARCH_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/egos.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/timer.cpp
 )
 
 set(CMAKE_CXX_FLAGS

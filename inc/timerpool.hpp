@@ -17,45 +17,106 @@
 #ifndef __TIMERPOOL_HPP__
 #define __TIMERPOOL_HPP__
 
-#include <list>
+#include <vector>
+#include <memory>
+#include <cassert>
 
 namespace osapi {
 
+class timerpool;
+
 class timer {
+    int id;
     bool is_async;
+    timerpool *pool;
 
 public:
-    timer() : is_async(false) {};
+    timer();
 
-    void wait_async() {};
+    void wait_async(int msecs);
 
-    void wait_cancel() {};
+    void cancel_async();
 
-    void wait_sync() {};
+    void wait_sync(int msecs);
 
+    friend class timerpool;
 };
 
 class timerpool {
 
-    typedef struct _timerinfo {
+    struct timerinfo {
+        timer tmr;
+
         int id;
         bool acquired;
-        timer tmr;
-    } timerinfo;
+        bool auto_return;
 
-    std::list<timerinfo> tmrs_info;
+        timerinfo(int id) : id(id),
+                            acquired(false),
+                            auto_return(false)
+                            {};
+
+    };
+
+    std::vector<std::shared_ptr<timerinfo>> tmrs_info;
+
+    void try_return(timer *tmr) {
+        assert(tmr);
+
+        timerinfo *tmri = reinterpret_cast<timerinfo*>(tmr);
+        if (tmri->auto_return)
+            put_timer(&tmri->tmr);
+
+    };
 
 public:
-    timerpool() {};
+    explicit timerpool(int max_timers) {
+        std::shared_ptr<timerinfo> tmri;
 
-    timer& get_timer() {};
+        for (int i = 0; i < max_timers; i++) {
+            tmri = std::shared_ptr<timerinfo>(new timerinfo(i));
+            tmri->tmr.id = i;
+            tmri->tmr.pool = this;
+            tmrs_info.push_back(tmri);
+        }
+    };
 
-    void put_timer(const timer& tmr) {};
+    timer *get_timer(bool auto_ret) {
+        assert(!tmrs_info.empty());
 
-    void wipe_out() {};
+        for (auto tmri : tmrs_info) {
+            if (!tmri->acquired) {
+                tmri->acquired = true;
+                tmri->auto_return = auto_ret;
+                return &tmri->tmr;
+            }
+        }
+
+        return nullptr;
+    };
+
+    void put_timer(timer *tmr) {
+        assert(tmr);
+
+        timerinfo *tmri = reinterpret_cast<timerinfo*>(tmr);
+        assert(tmri->id == tmr->id);
+        assert(tmri->acquired);
+
+        if (tmr->is_async)
+            tmr->cancel_async();
+
+        tmri->acquired = false;
+        tmri->auto_return = false;
+    };
+
+    void wipe_out() {
+        for (auto tmri : tmrs_info) {
+            if (tmri->acquired)
+                put_timer(&tmri->tmr);
+        }
+    };
 
     friend class timer;
-
 };
 
 }

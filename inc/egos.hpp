@@ -23,6 +23,7 @@
 #include <string>
 
 #include "looper.hpp"
+#include "timerpool.hpp"
 #include "workitem.hpp"
 
 namespace osapi {
@@ -35,6 +36,7 @@ enum class comm_ports : uint8_t {
 class egos {
     egos() {};
 
+    std::unique_ptr<timerpool> timers;
     std::unique_ptr<looper_if<workitem>> main_looper;
 
     class options {

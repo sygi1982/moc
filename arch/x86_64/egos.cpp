@@ -27,6 +27,7 @@
 
 #include "egos.hpp"
 #include "looper.hpp"
+#include "timerpool.hpp"
 #include "workitem.hpp"
 
 #include "locker.hpp"
@@ -63,6 +64,8 @@ void egos::initialize(int &argc, char **argv)
     main_looper =
         std::unique_ptr<looper<locker, syncer<locker>, workitem>>(
             new looper<locker, syncer<locker>, workitem>);
+
+    timers = std::unique_ptr<timerpool>(new timerpool(16));
 }
 
 void egos::start()
