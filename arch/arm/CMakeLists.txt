@@ -13,6 +13,9 @@ set(C_SRCS
 
 set(ARCH_SRCS ${C_SRCS} ${CPP_SRCS})
 
+# local includes
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
+
 set(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} -fmessage-length=0 -fno-builtin -ffunction-sections -fdata-sections")
 set(CMAKE_CXX_FLAGS
