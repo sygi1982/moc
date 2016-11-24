@@ -16,6 +16,7 @@
  */
 #include <thread>
 #include <chrono>
+#include <functional>
 #include <cassert>
 
 #include "egos.hpp"
@@ -23,27 +24,50 @@
 
 namespace osapi {
 
-timer::timer() : is_async(false)
-{
+struct timerdat {
+    std::thread *handler;
 
 };
 
-void timer::wait_async(int msecs)
+timer::timer() : is_async(false),
+                 priv_data(nullptr)
 {
-    assert(is_async);
+    priv_data = reinterpret_cast<void *>(new timerdat);
+    assert(priv_data);
+};
 
-    pool->try_return(this);
+timer::~timer()
+{
+    timerdat *data = reinterpret_cast<timerdat *>(priv_data);
+    if (data)
+        delete data;
+};
+
+void timer::wait_async(int msecs, std::function<void()> delegate)
+{
+    is_async = true;
+    timerdat *data = reinterpret_cast<timerdat *>(priv_data);
+    data->handler = new std::thread([this, delegate, msecs]() {
+            wait_sync(msecs);
+            delegate();
+            pool->try_return(this);
+        });
+    data->handler->detach();
 };
 
 void timer::cancel_async()
 {
     assert(is_async);
+    timerdat *data = reinterpret_cast<timerdat *>(priv_data);
+    assert(data->handler);
+    data->handler->join();
 };
 
 void timer::wait_sync(int msecs)
 {
     std::chrono::milliseconds delay(msecs);
     std::this_thread::sleep_for(delay);
+    is_async = false;
 
     pool->try_return(this);
 };

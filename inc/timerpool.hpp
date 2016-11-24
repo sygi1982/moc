@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <memory>
+#include <functional>
 #include <cassert>
 
 namespace osapi {
@@ -29,11 +30,14 @@ class timer {
     int id;
     bool is_async;
     timerpool *pool;
+    void *priv_data;
 
 public:
     timer();
 
-    void wait_async(int msecs);
+    ~timer();
+
+    void wait_async(int msecs, std::function<void()> delegate);
 
     void cancel_async();
 

@@ -68,6 +68,11 @@ public:
         main_looper->post(item);
     };
 
+    void process_delayed(std::shared_ptr<workitem> &item, int msecs) {
+        timer *tmr = timers->get_timer(true);
+        tmr->wait_async(msecs, [this, &item]() { main_looper->post(item); });
+    };
+
     /* Static methods */
     static egos& get_instance()
     {

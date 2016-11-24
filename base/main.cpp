@@ -49,6 +49,14 @@ int main(int argc, char **argv)
     } catch (std::bad_alloc &e) {
         egos::prints("\nBad alloc error\n");
     }
+
+    try {
+        std::shared_ptr<workitem> item(new workitem(2));
+        os_api.process_delayed(item, 1000);
+    } catch (std::bad_alloc &e) {
+        egos::prints("\nBad alloc error\n");
+    }
+
     os_api.start();
 
     egos::prints("Finished!\n");
