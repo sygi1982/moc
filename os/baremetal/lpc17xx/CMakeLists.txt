@@ -32,7 +32,7 @@ set(CMAKE_EXE_LINKER_FLAGS
 set(EXE_NAME
     ${CMAKE_PROJECT_NAME}.elf)
 
-add_executable(${EXE_NAME} ${ALL_SRCS} ${ARCH_SRCS} ${PLAT_SRCS})
+add_executable(${EXE_NAME} ${ALL_SRCS} ${OS_SRCS} ${PLAT_SRCS})
 
 target_link_libraries(${EXE_NAME}
                       ${CMAKE_CURRENT_SOURCE_DIR}/lib/libc_newlib.a)

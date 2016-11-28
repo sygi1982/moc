@@ -3,18 +3,18 @@ cmake_minimum_required(VERSION 2.8)
 project(SMARTCAN)
 
 #platform
-if (NOT DEFINED TARGET_ARCH)
-    set(TARGET_ARCH "x86_64")
+if (NOT DEFINED TARGET_OS)
+    set(TARGET_OS "linux")
 endif()
 
 string(ASCII 27 Esc)
 set(COLOR "${Esc}[33m")
 set(END_COLOR "${Esc}[m")
 
-message(STATUS "${COLOR}## Building for ${TARGET_ARCH}${END_COLOR}")
+message(STATUS "${COLOR}## Building for ${TARGET_OS}${END_COLOR}")
 
 set(CMAKE_BINARY_DIR
-    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${TARGET_ARCH})
+    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${TARGET_OS})
 set(EXECUTABLE_OUTPUT_PATH
     ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH
@@ -51,4 +51,4 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/base)
 add_subdirectory(${CMAKE_SOURCE_DIR}/core)
 
 # call platform specific cmake
-add_subdirectory(${CMAKE_SOURCE_DIR}/arch/${TARGET_ARCH})
+add_subdirectory(${CMAKE_SOURCE_DIR}/os/${TARGET_OS})

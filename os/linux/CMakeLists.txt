@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(ArchLib)
+project(OsLib)
 
-set(ARCH_SRCS
+set(OS_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/egos.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/timer.cpp
 )
@@ -15,4 +15,4 @@ set(CMAKE_CXX_FLAGS
 set(CMAKE_CXX_FLAGS
    "${CMAKE_CXX_FLAGS} -fno-builtin -ffunction-sections -fdata-sections -frtti -funwind-tables")
 
-add_executable(${CMAKE_PROJECT_NAME} ${ALL_SRCS} ${ARCH_SRCS})
+add_executable(${CMAKE_PROJECT_NAME} ${ALL_SRCS} ${OS_SRCS})
