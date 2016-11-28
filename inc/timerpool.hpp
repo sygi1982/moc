@@ -22,15 +22,17 @@
 #include <functional>
 #include <cassert>
 
+#include "utils.hpp"
+
 namespace osapi {
 
 class timerpool;
 
 class timer {
-    int id;
-    bool is_async;
-    timerpool *pool;
-    void *priv_data;
+    int _id;
+    bool _is_async;
+    timerpool *_pool;
+    void *_priv_data;
 
 public:
     timer();
@@ -62,7 +64,7 @@ class timerpool {
 
     };
 
-    std::vector<std::shared_ptr<timerinfo>> tmrs_info;
+    std::vector<autoptr<timerinfo>> _tmrs_info;
 
     void try_return(timer *tmr) {
         assert(tmr);
@@ -71,24 +73,24 @@ class timerpool {
         if (tmri->auto_return)
             put_timer(&tmri->tmr);
 
-    };
+    }
 
 public:
     explicit timerpool(int max_timers) {
-        std::shared_ptr<timerinfo> tmri;
+        autoptr<timerinfo> tmri;
 
         for (int i = 0; i < max_timers; i++) {
-            tmri = std::shared_ptr<timerinfo>(new timerinfo(i));
-            tmri->tmr.id = i;
-            tmri->tmr.pool = this;
-            tmrs_info.push_back(tmri);
+            tmri = autoptr<timerinfo>(new timerinfo(i));
+            tmri->tmr._id = i;
+            tmri->tmr._pool = this;
+            _tmrs_info.push_back(tmri);
         }
-    };
+    }
 
     timer *get_timer(bool auto_ret) {
-        assert(!tmrs_info.empty());
+        assert(!_tmrs_info.empty());
 
-        for (auto tmri : tmrs_info) {
+        for (auto tmri : _tmrs_info) {
             if (!tmri->acquired) {
                 tmri->acquired = true;
                 tmri->auto_return = auto_ret;
@@ -97,28 +99,28 @@ public:
         }
 
         return nullptr;
-    };
+    }
 
     void put_timer(timer *tmr) {
         assert(tmr);
 
         timerinfo *tmri = reinterpret_cast<timerinfo*>(tmr);
-        assert(tmri->id == tmr->id);
+        assert(tmri->id == tmr->_id);
         assert(tmri->acquired);
 
-        if (tmr->is_async)
+        if (tmr->_is_async)
             tmr->cancel_async();
 
         tmri->acquired = false;
         tmri->auto_return = false;
-    };
+    }
 
     void wipe_out() {
-        for (auto tmri : tmrs_info) {
+        for (auto tmri : _tmrs_info) {
             if (tmri->acquired)
                 put_timer(&tmri->tmr);
         }
-    };
+    }
 
     friend class timer;
 };

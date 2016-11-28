@@ -61,16 +61,18 @@ void egos::initialize(int &argc, char **argv)
 
     parse_opts(argv[0]);
 
-    main_looper =
+    _main_looper =
         std::unique_ptr<looper<locker, syncer<locker>, workitem>>(
             new looper<locker, syncer<locker>, workitem>);
 
-    timers = std::unique_ptr<timerpool>(new timerpool(16));
+    _timers = std::unique_ptr<timerpool>(new timerpool(16));
 }
 
 void egos::start()
 {
-    std::thread looper([this]() { main_looper->run(); });
+    std::thread looper([this]() {
+            _main_looper->run();
+        });
     looper.join();
 };
 

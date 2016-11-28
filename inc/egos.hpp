@@ -21,10 +21,12 @@
 #include <memory>
 #include <map>
 #include <string>
+#include <cassert>
 
 #include "looper.hpp"
 #include "timerpool.hpp"
 #include "workitem.hpp"
+#include "utils.hpp"
 
 namespace osapi {
 
@@ -36,8 +38,8 @@ enum class comm_ports : uint8_t {
 class egos {
     egos() {};
 
-    std::unique_ptr<timerpool> timers;
-    std::unique_ptr<looper_if<workitem>> main_looper;
+    std::unique_ptr<timerpool> _timers;
+    std::unique_ptr<looper_if<workitem>> _main_looper;
 
     class options {
     public:
@@ -64,14 +66,25 @@ public:
 
     void start();
 
-    void process(std::shared_ptr<workitem> &item) {
-        main_looper->post(item);
-    };
+    void process(autoptr<workitem> item) {
 
-    void process_delayed(std::shared_ptr<workitem> &item, int msecs) {
-        timer *tmr = timers->get_timer(true);
-        tmr->wait_async(msecs, [this, &item]() { main_looper->post(item); });
-    };
+        prints("process %u\n", item->get_id());
+        _main_looper->post(item);
+        prints("process done %u\n", item->get_id());
+    }
+
+    void process_delayed(autoptr<workitem> item, int msecs) {
+
+        prints("process_delayed(%u) %u\n", msecs, item->get_id());
+        timer *tmr = _timers->get_timer(true);
+        assert(tmr);
+
+        tmr->wait_async(msecs, [this, item]() {
+                _main_looper->post(item);
+            });
+
+        prints("process_delayed(%u) %u done\n", msecs, item->get_id());
+    }
 
     /* Static methods */
     static egos& get_instance()
@@ -86,10 +99,12 @@ public:
 
     class exception {
         int code;
+
     public:
         exception() : code(0) {;};
         exception(int code) : code(code) {;};
         int get_code() { return code; };
+
     };
 };
 

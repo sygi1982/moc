@@ -29,47 +29,49 @@ struct timerdat {
 
 };
 
-timer::timer() : is_async(false),
-                 priv_data(nullptr)
+timer::timer() : _is_async(false),
+                 _priv_data(nullptr)
 {
-    priv_data = reinterpret_cast<void *>(new timerdat);
-    assert(priv_data);
+    _priv_data = reinterpret_cast<void *>(new timerdat);
+    assert(_priv_data);
 };
 
 timer::~timer()
 {
-    timerdat *data = reinterpret_cast<timerdat *>(priv_data);
+    timerdat *data = reinterpret_cast<timerdat *>(_priv_data);
     if (data)
         delete data;
 };
 
 void timer::wait_async(int msecs, std::function<void()> delegate)
 {
-    is_async = true;
-    timerdat *data = reinterpret_cast<timerdat *>(priv_data);
+    egos::prints("wait_async %u\n", msecs);
+    _is_async = true;
+    timerdat *data = reinterpret_cast<timerdat *>(_priv_data);
     data->handler = new std::thread([this, delegate, msecs]() {
             wait_sync(msecs);
             delegate();
-            pool->try_return(this);
+            _pool->try_return(this);
         });
-    data->handler->detach();
 };
 
 void timer::cancel_async()
 {
-    assert(is_async);
-    timerdat *data = reinterpret_cast<timerdat *>(priv_data);
+    egos::prints("cancel_async\n");
+    assert(_is_async);
+    timerdat *data = reinterpret_cast<timerdat *>(_priv_data);
     assert(data->handler);
-    data->handler->join();
+    data->handler->detach();
 };
 
 void timer::wait_sync(int msecs)
 {
+    egos::prints("wait_sync %u\n", msecs);
     std::chrono::milliseconds delay(msecs);
     std::this_thread::sleep_for(delay);
-    is_async = false;
+    _is_async = false;
 
-    pool->try_return(this);
+    _pool->try_return(this);
 };
 
 }

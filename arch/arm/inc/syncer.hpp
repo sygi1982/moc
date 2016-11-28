@@ -17,6 +17,8 @@
 #ifndef __SYNCER_HPP__
 #define __SYNCER_HPP__
 
+#include <functional>
+
 #include "irqmgr.hpp"
 
 namespace osapi {
@@ -29,7 +31,7 @@ class syncer {
 public:
     syncer() {};
 
-    void wait(Tlock& lock) {
+    void wait(Tlock& lock, std::function<bool()> pred) {
         irqmgr::wfi();
     };
 

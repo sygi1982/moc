@@ -22,21 +22,21 @@
 namespace osapi {
 
 class locker {
-    std::mutex mutex;
+    std::mutex _mtx;
 
 public:
     locker() {};
 
-    void lock() {
-        mutex.lock();
+    void acquire() {
+        _mtx.lock();
     };
 
-    void unlock() {
-        mutex.unlock();
+    void release() {
+        _mtx.unlock();
     };
 
     std::mutex& get_raw() {
-        return mutex;
+        return _mtx;
     }
 };
 

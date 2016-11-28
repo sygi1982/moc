@@ -19,23 +19,24 @@
 
 #include <mutex>
 #include <condition_variable>
+#include <functional>
 
 namespace osapi {
 
 template <typename Tlock>
 class syncer {
-    std::condition_variable cond;
+    std::condition_variable _cond;
 
 public:
     syncer() {};
 
-    void wait(Tlock& lock) {
+    void wait(Tlock& lock, std::function<bool()> pred) {
         std::unique_lock<std::mutex> ul(lock.get_raw());
-        cond.wait(ul);
+        _cond.wait(ul, pred);
     };
 
     void wake() {
-        cond.notify_all();
+        _cond.notify_all();
     };
 };
 

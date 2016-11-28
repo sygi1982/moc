@@ -20,7 +20,7 @@
 namespace osapi {
 
 class workitem {
-    int id;
+    int _id;
 
 public:
     workitem(int id);

@@ -39,14 +39,14 @@ void egos::introduce_self(void)
 
 void egos::initialize(int &argc, char **argv)
 {
-    main_looper =
+    _main_looper =
         std::unique_ptr<looper<locker, syncer<locker>, workitem>>(
             new looper<locker, syncer<locker>, workitem>);
 }
 
 void egos::start()
 {
-    main_looper->run();
+    _main_looper->run();
 };
 
 void egos::parse_opts(const char *app)

@@ -28,11 +28,11 @@ class locker {
 public:
     locker() {};
 
-    void lock() {
+    void acquire() {
         irqmgr::ints_dis();
     };
 
-    void unlock() {
+    void release() {
         irqmgr::ints_ena();
     };
 };

@@ -18,69 +18,85 @@
 #define __LOOPER_HPP__
 
 #include <list>
-#include <mutex>
 #include <memory>
 #include <cassert>
+
+#include "utils.hpp"
 
 namespace osapi {
 
 template <typename Titem>
 class looper_if {
-
 public:
     virtual ~looper_if() {};
 
     virtual void run() {};
     virtual void stop() {};
-    virtual void post(std::shared_ptr<Titem> &item) {};
+    virtual void post(autoptr<Titem> item) {};
+
 };
 
 template <typename Tlock, typename Tsync, typename Titem>
 class looper : public looper_if<Titem> {
-
     typedef Tlock locker;
     typedef Tsync syncer;
 
-    locker lock;
-    syncer sync;
-    std::list<std::shared_ptr<Titem>> queue;
-    bool stopped;
+    locker _lock;
+    syncer _sync;
+    std::list<autoptr<Titem>> _queue;
+    bool _stopped;
 
 public:
-    looper() : stopped(true) {};
+    looper() : _stopped(true) {};
 
     void run() {
-        assert(stopped == true);
-        stopped = false;
+        assert(_stopped == true);
 
-        while(!stopped) {
-            lock.lock();
+        _stopped = false;
 
-            while (queue.empty())
-                sync.wait(lock);
+        while(true) {
 
-            auto item = queue.front();
-            item->utilize();
-            queue.pop_front();
+            _sync.wait(_lock, [this]() {
+                return !_queue.empty() || _stopped;
+            });
 
-            lock.unlock();
-        }
-    };
+            {
+                guard<Tlock> lk(_lock);
+
+                if (_stopped)
+                    break;
+
+                auto item = _queue.front();
+                lk.unlock();
+
+                item->utilize();
+
+                lk.lock();
+                _queue.pop_front();
+            }
+        };
+    }
 
     void stop() {
-         std::lock_guard<locker> lg(lock);
+         assert(_stopped == false);
+         {
+             guard<Tlock> lk(_lock);
 
-         stopped = true;
-         queue.clear();
-         sync.wake();
-    };
+             _stopped = true;
+             _queue.clear();
+         }
+         _sync.wake();
+    }
 
-    void post(std::shared_ptr<Titem> &item) {
-         std::lock_guard<locker> lg(lock);
+    void post(autoptr<Titem> item) {
+         {
+             guard<Tlock> lk(_lock);
 
-         queue.push_back(item);
-         sync.wake();
-    };
+             _queue.push_back(item);
+         }
+         _sync.wake();
+    }
+
 };
 
 }

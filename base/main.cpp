@@ -16,15 +16,32 @@
  */
 #include <cstdlib>
 #include <new>
-#include <memory>
 #include <stdexcept>
 #include <exception>
 #include <stdio.h>
 
 #include "egos.hpp"
 #include "timerpool.hpp"
+#include "utils.hpp"
 
 using namespace osapi;
+
+class timerwork : public workitem {
+public:
+    timerwork(int id) : workitem(id) {
+        egos::prints("timerwork %u\n", workitem::get_id());
+    }
+
+    ~timerwork() {
+        egos::prints(" ~timerwork %u\n", workitem::get_id());
+    }
+
+    bool utilize() {
+        workitem::utilize();
+        egos::prints(" timerwork %u utilize\n", workitem::get_id());
+        return true;
+    }
+};
 
 int main(int argc, char **argv)
 {
@@ -44,15 +61,15 @@ int main(int argc, char **argv)
     os_api.introduce_self();
 
     try {
-        std::shared_ptr<workitem> item(new workitem(1));
+        autoptr<workitem> item(new workitem(1));
         os_api.process(item);
     } catch (std::bad_alloc &e) {
         egos::prints("\nBad alloc error\n");
     }
 
     try {
-        std::shared_ptr<workitem> item(new workitem(2));
-        os_api.process_delayed(item, 1000);
+        autoptr<workitem> item(new timerwork(2));
+        os_api.process_delayed(item, 2000);
     } catch (std::bad_alloc &e) {
         egos::prints("\nBad alloc error\n");
     }

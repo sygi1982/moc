@@ -18,30 +18,30 @@
 
 namespace osapi {
 
-workitem::workitem(int id) : id(id)
+workitem::workitem(int id) : _id(id)
 {
-    egos::prints("workitem %u\n", id);
-};
+    egos::prints("workitem %u\n", _id);
+}
 
 workitem::~workitem()
 {
-    egos::prints(" ~workitem %u\n", id);
-};
+    egos::prints(" ~workitem %u\n", _id);
+}
 
 bool workitem::utilize()
 {
-    egos::prints(" workitem %u utilize\n", id);
+    egos::prints(" workitem %u utilize\n", _id);
     return false;
-};
+}
 
 int workitem::get_id() const
 {
-    return id;
-};
+    return _id;
+}
 
 int workitem::get_type() const
 {
     return -1;
-};
+}
 
 }
