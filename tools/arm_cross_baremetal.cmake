@@ -15,7 +15,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PLAT_CONFIG_C_FLAGS}" CACHE STRING "")
 # target environment
 set(TOOLCHAIN_PREFIX arm-none-eabi-)
 set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}gcc)
-set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}c++)
+set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}g++)
 set(TOOLCHAIN_ROOT /opt/arm-cross-compilers/gcc-arm-none-eabi-5_4-2016q2/)
 set(CMAKE_FIND_ROOT_PATH ${TOOLCHAIN_ROOT})
 # search for programs in the build host directories
