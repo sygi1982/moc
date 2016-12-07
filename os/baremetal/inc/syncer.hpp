@@ -32,7 +32,8 @@ public:
     syncer() {};
 
     void wait(Tlock& lock, std::function<bool()> pred) {
-        irqmgr::wfi();
+        while(!pred())
+            irqmgr::wfi();
     };
 
     void wake() {
