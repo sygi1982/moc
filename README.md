@@ -19,6 +19,16 @@ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../tools/arm_cross_barem
 
 make;
 
+# Tests
+
+## Build UnitTests (gtest)
+
+cmake -DCMAKE_BUILD_TYPE=Debug -DTARGET_OS=linux -DBUILD_UT=ON ..; make;
+
+## Functional tests
+
+python,bash - TBD
+
 # Deploy for embedded target
 
 make deploy ISP_PORT=ttyS1

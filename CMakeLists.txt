@@ -52,3 +52,19 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/core)
 
 # call platform specific cmake
 add_subdirectory(${CMAKE_SOURCE_DIR}/os/${TARGET_OS})
+
+# unit tests using gtest
+if (BUILD_UT)
+    find_package(GTest REQUIRED)
+    include_directories(${GTEST_INCLUDE_DIRS})
+    set(TARGET_UT UnitTests)
+    set(UT_FILES tests/osapi_ut.cpp)
+
+    enable_testing()
+    add_executable(${TARGET_UT} ${UT_FILES})
+    target_link_libraries(${TARGET_UT} ${GTEST_LIBRARIES} pthread)
+    set_target_properties(${TARGET_UT} PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
+    add_test(${TARGET_UT} ${TARGET_UT})
+endif()
+
+
