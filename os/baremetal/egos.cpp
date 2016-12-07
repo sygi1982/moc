@@ -42,6 +42,8 @@ void egos::initialize(int &argc, char **argv)
     _main_looper =
         std::unique_ptr<looper<locker, syncer<locker>, workitem>>(
             new looper<locker, syncer<locker>, workitem>);
+
+    _timers = std::unique_ptr<timerpool>(new timerpool(4));
 }
 
 void egos::start()
