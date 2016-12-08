@@ -24,44 +24,37 @@
 
 namespace osapi {
 
-struct timerdat {
-    std::thread *handler;
-
-};
-
 timer::timer() : _is_async(false),
                  _priv_data(nullptr)
 {
-    _priv_data = reinterpret_cast<void *>(new timerdat);
-    assert(_priv_data);
 };
 
 timer::~timer()
 {
-    timerdat *data = reinterpret_cast<timerdat *>(_priv_data);
-    if (data)
-        delete data;
+    std::thread *handler = static_cast<std::thread *>(_priv_data);
+    if (handler)
+        delete handler;
 };
 
 void timer::wait_async(int msecs, std::function<void()> delegate)
 {
     egos::prints("wait_async %u\n", msecs);
     _is_async = true;
-    timerdat *data = reinterpret_cast<timerdat *>(_priv_data);
-    data->handler = new std::thread([this, delegate, msecs]() {
+    std::thread *handler = new std::thread([this, delegate, msecs]() {
             wait_sync(msecs);
             delegate();
             _pool->try_return(this);
         });
+    _priv_data = static_cast<void *>(handler);
 };
 
 void timer::cancel_async()
 {
     egos::prints("cancel_async\n");
     assert(_is_async);
-    timerdat *data = reinterpret_cast<timerdat *>(_priv_data);
-    assert(data->handler);
-    data->handler->detach();
+    std::thread *handler = static_cast<std::thread *>(_priv_data);
+    assert(handler);
+    handler->detach();
 };
 
 void timer::wait_sync(int msecs)

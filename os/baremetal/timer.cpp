@@ -19,48 +19,47 @@
 
 #include "egos.hpp"
 #include "timerpool.hpp"
+#include "hwtmr.hpp"
 
 namespace osapi {
 
-struct timerdat {
-    int tim; // TODO: put hw timer here
-};
+using namespace halapi;
 
 timer::timer() : _is_async(false),
                  _priv_data(nullptr)
 {
-    _priv_data = reinterpret_cast<void *>(new timerdat);
+    _priv_data = static_cast<void *>(new hwtmr(_id));
     assert(_priv_data);
 };
 
 timer::~timer()
 {
-    timerdat *data = reinterpret_cast<timerdat *>(_priv_data);
-    if (data)
-        delete data;
+    hwtmr *tmr = static_cast<hwtmr *>(_priv_data);
+    if (tmr)
+        delete tmr;
 };
 
 void timer::wait_async(int msecs, std::function<void()> delegate)
 {
     egos::prints("wait_async %u\n", msecs);
     _is_async = true;
-    timerdat *data = reinterpret_cast<timerdat *>(_priv_data);
-    // TODO: start hw timer
+    hwtmr *tmr = static_cast<hwtmr *>(_priv_data);
+    tmr->start(msecs, delegate);
 };
 
 void timer::cancel_async()
 {
     egos::prints("cancel_async\n");
     assert(_is_async);
-    timerdat *data = reinterpret_cast<timerdat *>(_priv_data);
-    // TODO: cancel hw timer
+    hwtmr *tmr = static_cast<hwtmr *>(_priv_data);
+    tmr->stop();
 };
 
 void timer::wait_sync(int msecs)
 {
     egos::prints("wait_sync %u\n", msecs);
     _is_async = false;
-    // TODO: sleep with hw timer
+    // TODO: simple busy loop wait
 
     _pool->try_return(this);
 };
