@@ -11,6 +11,7 @@ set(C_SRCS
 set(CPP_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/cpp_hooks.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/startup_lpc176x.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/hal.cpp
 )
 
 set(PLAT_SRCS ${C_SRCS} ${CPP_SRCS})

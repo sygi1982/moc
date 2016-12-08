@@ -29,11 +29,11 @@ public:
     locker() {};
 
     void acquire() {
-        irqmgr::ints_dis();
+        irqmgr::get_instance().ints_dis();
     };
 
     void release() {
-        irqmgr::ints_ena();
+        irqmgr::get_instance().ints_ena();
     };
 };
 

@@ -17,27 +17,41 @@
 #ifndef __IRQMGR_HPP__
 #define __IRQMGR_HPP__
 
+#include <functional>
+#include <map>
+
 namespace halapi {
 
 class irqmgr {
-    explicit irqmgr() {};
+    std::map<int, std::function<void()>> _handlers;
+
+    void handle_int(int num);
+
+    irqmgr() {
+        _handlers.clear();
+    }
 
 public:
-    static void register_int() {
-    };
+    irqmgr(irqmgr const&) = delete;
+    void operator=(irqmgr const&) = delete;
 
-    static void ints_ena() {
-        // TODO: enable interrupts
-    };
+    static irqmgr& get_instance()
+    {
+        static irqmgr inst;
+        return inst;
+    }
 
-    static void ints_dis() {
-        // TODO: disable interrupts
-    };
+    void register_int(const int num, std::function<void()> handler);
 
-    static void wfi() {
-        // TODO: wait for interrupt
-    };
+    void unregister_int(const int num);
 
+    void ints_ena();
+
+    void ints_dis();
+
+    void wfi();
+
+    friend void raise_int(int num);
 };
 
 }

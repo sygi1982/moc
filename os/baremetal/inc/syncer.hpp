@@ -33,7 +33,7 @@ public:
 
     void wait(Tlock& lock, std::function<bool()> pred) {
         while(!pred())
-            irqmgr::wfi();
+            irqmgr::get_instance().wfi();
     };
 
     void wake() {
