@@ -17,6 +17,8 @@
 #ifndef __UTILS_HPP__
 #define __UTILS_HPP__
 
+#include <cassert>
+
 template <typename Tlock>
 class guard {
     typedef Tlock locker;
@@ -45,8 +47,13 @@ public:
 template <typename Ttype>
 class singleton
 {
+    static int instances;
 protected:
-    inline explicit singleton() = default;
+    inline explicit singleton() {
+        if (++instances > 1)
+            assert(false && "singleton instance already exists !, \
+                           use get_instance()");
+    }
 
 public:
     singleton(singleton const&) = delete;
@@ -57,7 +64,11 @@ public:
         static Ttype inst;
         return inst;
     }
+
 };
+
+template <typename Ttype>
+int singleton<Ttype>::instances = 0;
 
 template <typename Ttype>
 class autoptr
