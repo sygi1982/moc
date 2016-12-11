@@ -28,7 +28,7 @@ class syncer {
     std::condition_variable _cond;
 
 public:
-    syncer() {};
+    syncer() = default;
 
     void wait(Tlock& lock, std::function<bool()> pred) {
         std::unique_lock<std::mutex> ul(lock.get_raw());

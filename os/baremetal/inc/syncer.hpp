@@ -29,7 +29,7 @@ template <typename Tlock>
 class syncer {
 
 public:
-    syncer() {};
+    syncer() = default;
 
     void wait(Tlock& lock, std::function<bool()> pred) {
         while(!pred())

@@ -46,7 +46,7 @@ template <typename Ttype>
 class singleton
 {
 protected:
-    inline explicit singleton() {};
+    inline explicit singleton() = default;
 
 public:
     singleton(singleton const&) = delete;

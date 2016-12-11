@@ -26,7 +26,7 @@ using namespace halapi;
 class locker {
 
 public:
-    locker() {};
+    locker() = default;
 
     void acquire() {
         irqmgr::get_instance().ints_dis();

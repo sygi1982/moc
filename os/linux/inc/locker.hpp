@@ -25,7 +25,7 @@ class locker {
     std::mutex _mtx;
 
 public:
-    locker() {};
+    locker() = default;
 
     void acquire() {
         _mtx.lock();
