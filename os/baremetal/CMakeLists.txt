@@ -25,7 +25,11 @@ set(CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} -fno-builtin -ffunction-sections -fdata-sections -frtti -funwind-tables")
 
 if (NOT DEFINED TARGET_PLAT)
-    add_executable(${CMAKE_PROJECT_NAME} ${ALL_SRCS} ${OS_SRCS})
+    set(DEFAULT_SRCS
+        ${CMAKE_CURRENT_SOURCE_DIR}/default/hal.cpp
+    )
+
+    add_executable(${CMAKE_PROJECT_NAME} ${ALL_SRCS} ${OS_SRCS} ${DEFAULT_SRCS})
 else()
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_PLAT})
 endif()
