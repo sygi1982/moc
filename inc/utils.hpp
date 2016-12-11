@@ -17,8 +17,6 @@
 #ifndef __UTILS_HPP__
 #define __UTILS_HPP__
 
-namespace osapi {
-
 template <typename Tlock>
 class guard {
     typedef Tlock locker;
@@ -42,6 +40,23 @@ public:
         _lock.release();
     }
 
+};
+
+template <typename Ttype>
+class singleton
+{
+protected:
+    inline explicit singleton() {};
+
+public:
+    singleton(singleton const&) = delete;
+    void operator=(singleton const&) = delete;
+
+    static Ttype& get_instance()
+    {
+        static Ttype inst;
+        return inst;
+    }
 };
 
 template <typename Ttype>
@@ -135,8 +150,6 @@ autoptr<Ttype>& autoptr<Ttype>::operator=(const autoptr<Ttype>& aptr)
          _holder->get();
     }
     return *this;
-}
-
 }
 
 #endif

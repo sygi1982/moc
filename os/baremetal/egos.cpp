@@ -20,8 +20,11 @@
 
 #include "locker.hpp"
 #include "syncer.hpp"
+#include "irqmgr.hpp"
 
 namespace osapi {
+
+using namespace halapi;
 
 extern "C" {
     extern void debug_print(const char *fmt, ...);
@@ -44,6 +47,8 @@ void egos::initialize(int &argc, char **argv)
             new looper<locker, syncer<locker>, workitem>);
 
     _timers = std::unique_ptr<timerpool>(new timerpool(4));
+
+    irqmgr::get_instance().initialize();
 }
 
 void egos::start()

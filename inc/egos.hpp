@@ -35,8 +35,7 @@ enum class comm_ports : uint8_t {
     CAN_PORT = 1,
 };
 
-class egos {
-    egos() {};
+class egos : public singleton<egos> {
 
     std::unique_ptr<timerpool> _timers;
     std::unique_ptr<looper_if<workitem>> _main_looper;
@@ -59,9 +58,6 @@ class egos {
     void parse_opts(const char *app);
 
 public:
-    egos(egos const&) = delete;
-    void operator=(egos const&) = delete;
-
     void initialize(int &argc, char **argv);
 
     void start();
@@ -87,12 +83,6 @@ public:
     }
 
     /* Static methods */
-    static egos& get_instance()
-    {
-        static egos inst;
-        return inst;
-    }
-
     static void prints(const char *fmt, ...);
 
     static void introduce_self(void);
@@ -102,7 +92,9 @@ public:
 
     public:
         exception() : code(0) {;};
+
         exception(int code) : code(code) {;};
+
         int get_code() { return code; };
 
     };

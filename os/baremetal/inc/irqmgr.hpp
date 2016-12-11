@@ -20,25 +20,18 @@
 #include <functional>
 #include <map>
 
+#include "utils.hpp"
+
 namespace halapi {
 
-class irqmgr {
+class irqmgr : public singleton<irqmgr> {
     std::map<int, std::function<void()>> _handlers;
 
     void handle_int(int num);
 
-    irqmgr() {
-        _handlers.clear();
-    }
-
 public:
-    irqmgr(irqmgr const&) = delete;
-    void operator=(irqmgr const&) = delete;
-
-    static irqmgr& get_instance()
-    {
-        static irqmgr inst;
-        return inst;
+    inline void initialize() {
+        _handlers.clear();
     }
 
     void register_int(const int num, std::function<void()> handler);
@@ -52,6 +45,7 @@ public:
     void wfi();
 
     friend void raise_int(int num);
+
 };
 
 }
