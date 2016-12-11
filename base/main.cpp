@@ -45,10 +45,10 @@ public:
 
 int main(int argc, char **argv)
 {
-    egos &os_api = egos::get_instance();
+    egos *os_api = &egos::get_instance();
 
     try {
-        os_api.initialize(argc, argv);
+        os_api->initialize(argc, argv);
     } catch (egos::exception &e) {
         int err = e.get_code();
 
@@ -58,23 +58,23 @@ int main(int argc, char **argv)
             egos::prints("Unexpected error -> %u\n", err);
     }
 
-    os_api.introduce_self();
+    os_api->introduce_self();
 
     try {
         autoptr<workitem> item(new workitem(1));
-        os_api.process(item);
+        os_api->process(item);
     } catch (std::bad_alloc &e) {
         egos::prints("\nBad alloc error\n");
     }
 
     try {
         autoptr<workitem> item(new timerwork(2));
-        os_api.process_delayed(item, 2000);
+        os_api->process_delayed(item, 2000);
     } catch (std::bad_alloc &e) {
         egos::prints("\nBad alloc error\n");
     }
 
-    os_api.start();
+    os_api->start();
 
     egos::prints("Finished!\n");
 }
