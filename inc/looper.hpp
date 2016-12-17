@@ -22,28 +22,32 @@
 #include <cassert>
 
 #include "utils.hpp"
+#include "workitem.hpp"
 
 namespace osapi {
 
-template <typename Titem>
+using namespace utils;
+
+typedef autoptr<workitem> autoitem;
+
 class looper_if {
 public:
     virtual ~looper_if() {};
 
-    virtual void run() {};
-    virtual void stop() {};
-    virtual void post(autoptr<Titem> item) {};
+    virtual void run() = 0;
+    virtual void stop() = 0;
+    virtual void post(autoitem item) = 0;
 
 };
 
-template <typename Tlock, typename Tsync, typename Titem>
-class looper : public looper_if<Titem> {
+template <typename Tlock, typename Tsync>
+class looper : public looper_if {
     typedef Tlock locker;
     typedef Tsync syncer;
 
     locker _lock;
     syncer _sync;
-    std::list<autoptr<Titem>> _queue;
+    std::list<autoitem> _queue;
     bool _stopped;
 
 public:
@@ -88,7 +92,7 @@ public:
          _sync.wake();
     }
 
-    void post(autoptr<Titem> item) {
+    void post(autoitem item) {
          {
              guard<Tlock> lk(_lock);
 

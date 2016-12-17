@@ -42,13 +42,13 @@ void egos::introduce_self(void)
 
 void egos::initialize(int &argc, char **argv)
 {
-    _main_looper =
-        std::unique_ptr<looper<locker, syncer<locker>, workitem>>(
-            new looper<locker, syncer<locker>, workitem>);
+    typedef looper<locker, syncer<locker>> superloop;
 
-    _timers = std::unique_ptr<timerpool>(new timerpool(4));
-
+    _main_looper = std::unique_ptr<superloop>(new superloop());
     irqmgr::get_instance().initialize();
+    _timers = std::unique_ptr<timerpool>(new timerpool(4));
+    _serial_port = std::unique_ptr<serial_port>(new serial_port());
+    _can_port = std::unique_ptr<can_port>(new can_port());
 }
 
 void egos::start()

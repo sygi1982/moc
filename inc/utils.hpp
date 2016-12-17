@@ -19,6 +19,8 @@
 
 #include <cassert>
 
+namespace utils {
+
 template <typename Tlock>
 class guard {
     typedef Tlock locker;
@@ -161,6 +163,8 @@ autoptr<Ttype>& autoptr<Ttype>::operator=(const autoptr<Ttype>& aptr)
          _holder->get();
     }
     return *this;
+}
+
 }
 
 #endif

@@ -26,6 +26,8 @@
 
 namespace osapi {
 
+using namespace utils;
+
 class timerpool;
 
 class timer {

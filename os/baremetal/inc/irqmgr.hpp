@@ -24,6 +24,8 @@
 
 namespace halapi {
 
+using namespace utils;
+
 class irqmgr : public singleton<irqmgr> {
     std::map<int, std::function<void()>> _handlers;
 

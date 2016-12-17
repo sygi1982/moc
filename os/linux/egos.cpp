@@ -29,6 +29,7 @@
 #include "looper.hpp"
 #include "timerpool.hpp"
 #include "workitem.hpp"
+#include "ports.hpp"
 
 #include "locker.hpp"
 #include "syncer.hpp"
@@ -61,11 +62,12 @@ void egos::initialize(int &argc, char **argv)
 
     parse_opts(argv[0]);
 
-    _main_looper =
-        std::unique_ptr<looper<locker, syncer<locker>, workitem>>(
-            new looper<locker, syncer<locker>, workitem>);
+    typedef looper<locker, syncer<locker>> superloop;
 
+    _main_looper = std::unique_ptr<superloop>(new superloop());
     _timers = std::unique_ptr<timerpool>(new timerpool(16));
+    _serial_port = std::unique_ptr<serial_port>(new serial_port("sp"));
+    _can_port = std::unique_ptr<can_port>(new can_port("cp"));
 }
 
 void egos::start()

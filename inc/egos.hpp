@@ -26,9 +26,12 @@
 #include "looper.hpp"
 #include "timerpool.hpp"
 #include "workitem.hpp"
+#include "ports.hpp"
 #include "utils.hpp"
 
 namespace osapi {
+
+using namespace utils;
 
 enum class comm_ports : uint8_t {
     SERIAL_PORT = 0,
@@ -38,7 +41,9 @@ enum class comm_ports : uint8_t {
 class egos : public singleton<egos> {
 
     std::unique_ptr<timerpool> _timers;
-    std::unique_ptr<looper_if<workitem>> _main_looper;
+    std::unique_ptr<looper_if> _main_looper;
+    std::unique_ptr<serial_port> _serial_port;
+    std::unique_ptr<can_port> _can_port;
 
     class options {
     public:
@@ -62,14 +67,14 @@ public:
 
     void start();
 
-    void process(autoptr<workitem> item) {
+    void process(autoitem item) {
 
         prints("process %u\n", item->get_id());
         _main_looper->post(item);
         prints("process done %u\n", item->get_id());
     }
 
-    void process_delayed(autoptr<workitem> item, int msecs) {
+    void process_delayed(autoitem item, int msecs) {
 
         prints("process_delayed(%u) %u\n", msecs, item->get_id());
         timer *tmr = _timers->get_timer(true);
@@ -80,6 +85,17 @@ public:
             });
 
         prints("process_delayed(%u) %u done\n", msecs, item->get_id());
+    }
+
+    std::unique_ptr<port> get_port(comm_ports type) {
+
+        if (type == comm_ports::SERIAL_PORT)
+            return std::move(_serial_port);
+       else if (type == comm_ports::CAN_PORT)
+            return std::move(_can_port);
+
+        assert(false);
+        return std::unique_ptr<port>(nullptr);
     }
 
     /* Static methods */
