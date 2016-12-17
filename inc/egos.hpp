@@ -42,8 +42,8 @@ class egos : public singleton<egos> {
 
     std::unique_ptr<timerpool> _timers;
     std::unique_ptr<looper_if> _main_looper;
-    std::unique_ptr<serial_port> _serial_port;
-    std::unique_ptr<can_port> _can_port;
+    autoptr<port> _serial_port;
+    autoptr<port> _can_port;
 
     class options {
     public:
@@ -87,15 +87,15 @@ public:
         prints("process_delayed(%u) %u done\n", msecs, item->get_id());
     }
 
-    std::unique_ptr<port> get_port(comm_ports type) {
+    autoptr<port> get_port(comm_ports type) {
 
         if (type == comm_ports::SERIAL_PORT)
-            return std::move(_serial_port);
+            return _serial_port;
        else if (type == comm_ports::CAN_PORT)
-            return std::move(_can_port);
+            return _can_port;
 
         assert(false);
-        return std::unique_ptr<port>(nullptr);
+        return autoptr<port>(nullptr);
     }
 
     /* Static methods */

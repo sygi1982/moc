@@ -47,8 +47,9 @@ void egos::initialize(int &argc, char **argv)
     _main_looper = std::unique_ptr<superloop>(new superloop());
     irqmgr::get_instance().initialize();
     _timers = std::unique_ptr<timerpool>(new timerpool(4));
-    _serial_port = std::unique_ptr<serial_port>(new serial_port());
-    _can_port = std::unique_ptr<can_port>(new can_port());
+
+    _serial_port = autoptr<serial_port>(new serial_port("sp"));
+    _can_port = autoptr<can_port>(new can_port("cp"));
 }
 
 void egos::start()
@@ -58,6 +59,7 @@ void egos::start()
 
 void egos::parse_opts(const char *app)
 {
+    //TODO: get stuff from non-volatile memory
 }
 
 }

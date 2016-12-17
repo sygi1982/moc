@@ -85,6 +85,7 @@ public:
     autoptr();
     autoptr(const autoptr<Ttype>& aptr);
     autoptr<Ttype>& operator=(const autoptr<Ttype>& aptr);
+    Ttype* get_raw();
 
     class holder
     {
@@ -163,6 +164,12 @@ autoptr<Ttype>& autoptr<Ttype>::operator=(const autoptr<Ttype>& aptr)
          _holder->get();
     }
     return *this;
+}
+
+template <typename Ttype>
+Ttype* autoptr<Ttype>::get_raw()
+{
+    return _data;
 }
 
 }

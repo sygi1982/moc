@@ -66,8 +66,9 @@ void egos::initialize(int &argc, char **argv)
 
     _main_looper = std::unique_ptr<superloop>(new superloop());
     _timers = std::unique_ptr<timerpool>(new timerpool(16));
-    _serial_port = std::unique_ptr<serial_port>(new serial_port("sp"));
-    _can_port = std::unique_ptr<can_port>(new can_port("cp"));
+
+    _serial_port = autoptr<port>(new serial_port("sp"));
+    _can_port = autoptr<port>(new can_port("cp"));
 }
 
 void egos::start()
