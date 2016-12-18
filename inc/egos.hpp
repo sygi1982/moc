@@ -17,6 +17,7 @@
 #ifndef __EGOS_HPP__
 #define __EGOS_HPP__
 
+#include <functional>
 #include <vector>
 #include <memory>
 #include <map>
@@ -85,6 +86,28 @@ public:
             });
 
         prints("process_delayed(%u) %u done\n", msecs, item->get_id());
+    }
+
+    void sleep_now(int msecs) {
+
+        prints("sleep_now(%u) %u\n", msecs);
+        timer *tmr = _timers->get_timer(true);
+        assert(tmr);
+
+        tmr->wait_sync(msecs);
+
+        prints("sleep_now done\n");
+    }
+
+    void call_after(std::function<void()> delegate, int msecs) {
+
+        prints("call_after(%u) %u\n", msecs);
+        timer *tmr = _timers->get_timer(true);
+        assert(tmr);
+
+        tmr->wait_async(msecs, delegate);
+
+        prints("call_after done\n");
     }
 
     autoptr<port> get_port(comm_ports type) {
