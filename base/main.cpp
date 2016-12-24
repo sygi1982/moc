@@ -55,7 +55,7 @@ int main(int argc, char **argv)
     egos *os_api = &egos::get_instance();
 
     try {
-        os_api->initialize(argc, argv);
+        os_api->initialize(argc, argv, 1000);
     } catch (egos::exception &e) {
         int err = e.get_code();
 
@@ -85,11 +85,6 @@ int main(int argc, char **argv)
     canp->send_frame(cf);
 //    canp.reset();
 
-    try {
-        autoitem item(new workitem(1));
-        os_api->process(item);
-    } catch (std::bad_alloc &e) {
-        egos::prints("\nBad alloc error\n");
     }
 
     try {
@@ -100,6 +95,7 @@ int main(int argc, char **argv)
         egos::prints("\nBad alloc error\n");
     }
 
+    //TODO: add a heartbeat task
     os_api->start();
 
     egos::prints("Finished!\n");

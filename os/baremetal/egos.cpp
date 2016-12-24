@@ -40,7 +40,7 @@ void egos::introduce_self(void)
     egos::prints("Hello from arm\n");
 }
 
-void egos::initialize(int &argc, char **argv)
+void egos::initialize(int &argc, char **argv, int guard_period)
 {
     typedef looper<locker, syncer<locker>> superloop;
 
@@ -50,6 +50,8 @@ void egos::initialize(int &argc, char **argv)
 
     _serial_port = autoptr<serial_port>(new serial_port("sp"));
     _can_port = autoptr<can_port>(new can_port("cp"));
+
+    setup_guard(guard_period);
 }
 
 void egos::start()

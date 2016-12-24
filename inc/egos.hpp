@@ -28,6 +28,7 @@
 #include "timerpool.hpp"
 #include "workitem.hpp"
 #include "ports.hpp"
+#include "watchdog.hpp"
 #include "utils.hpp"
 
 namespace osapi {
@@ -39,12 +40,17 @@ enum class comm_ports : uint8_t {
     CAN_PORT = 1,
 };
 
-class egos : public singleton<egos> {
+class egos : public singleton<egos>, private watchdog::bark {
 
     std::unique_ptr<timerpool> _timers;
     std::unique_ptr<looper_if> _main_looper;
+
     autoptr<port> _serial_port;
     autoptr<port> _can_port;
+
+    autoptr<watchdog> _watchdog;
+
+    bool _guard;
 
     class options {
     public:
@@ -63,8 +69,25 @@ class egos : public singleton<egos> {
 
     void parse_opts(const char *app);
 
+    void operator()(void) const {
+        prints("hauu!\n");
+    }
+
+    void setup_guard(int period) {
+        _guard = period > 0 ? true : false;
+
+        if (_guard) {
+            _watchdog = autoptr<watchdog>(new watchdog(
+                static_cast<watchdog::bark&>(*this)));
+            /* Excplictly own the timer */
+            timer *tmr = _timers->get_timer(false);
+
+            _watchdog->watch(tmr, period);
+        }
+    }
+
 public:
-    void initialize(int &argc, char **argv);
+    void initialize(int &argc, char **argv, int guard_period);
 
     void start();
 
@@ -108,6 +131,13 @@ public:
         tmr->wait_async(msecs, delegate);
 
         prints("call_after done\n");
+    }
+
+    void give_meat() {
+        if (_guard) {
+            assert(_watchdog.get_raw());
+            _watchdog->feed();
+        }
     }
 
     autoptr<port> get_port(comm_ports type) {

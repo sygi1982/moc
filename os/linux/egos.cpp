@@ -30,6 +30,7 @@
 #include "timerpool.hpp"
 #include "workitem.hpp"
 #include "ports.hpp"
+#include "watchdog.hpp"
 
 #include "locker.hpp"
 #include "syncer.hpp"
@@ -53,7 +54,7 @@ void egos::introduce_self(void)
     egos::prints("Hello from x86_64\n");
 }
 
-void egos::initialize(int &argc, char **argv)
+void egos::initialize(int &argc, char **argv, int guard_period)
 {
     for(int arg = 1; arg < argc; arg++) {
         auto astr(std::string(argv[arg]));
@@ -69,6 +70,8 @@ void egos::initialize(int &argc, char **argv)
 
     _serial_port = autoptr<port>(new serial_port("sp"));
     _can_port = autoptr<port>(new can_port("cp"));
+
+    setup_guard(guard_period);
 }
 
 void egos::start()
