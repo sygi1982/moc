@@ -85,8 +85,6 @@ int main(int argc, char **argv)
     canp->send_frame(cf);
 //    canp.reset();
 
-    }
-
     try {
         autoitem item(new delayed_work(2));
         item.get_raw();

@@ -48,8 +48,8 @@ void egos::initialize(int &argc, char **argv, int guard_period)
     irqmgr::get_instance().initialize();
     _timers = std::unique_ptr<timerpool>(new timerpool(4));
 
-    _serial_port = autoptr<serial_port>(new serial_port("sp"));
-    _can_port = autoptr<can_port>(new can_port("cp"));
+    _serial_port = autoptr<port>(new serial_port("sp"));
+    _can_port = autoptr<port>(new can_port("cp"));
 
     setup_guard(guard_period);
 }

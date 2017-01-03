@@ -6,6 +6,7 @@ project(OsLib)
 set(CPP_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/egos.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/timer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ports.cpp
 )
 
 set(C_SRCS
@@ -20,7 +21,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
 set(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} -fmessage-length=0 -fno-builtin -ffunction-sections -fdata-sections")
 set(CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -std=c++1y -fexceptions -fmessage-length=0")
+    "${CMAKE_CXX_FLAGS} -std=c++11 -fexceptions -fmessage-length=0")
 set(CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} -fno-builtin -ffunction-sections -fdata-sections -frtti -funwind-tables")
 
