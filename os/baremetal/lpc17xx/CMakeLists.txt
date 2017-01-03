@@ -22,7 +22,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
 set(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} -mcpu=cortex-m3 -mthumb")
 set(CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -mcpu=cortex-m3 -mthumb")
+    "${CMAKE_CXX_FLAGS} -mcpu=cortex-m3 -mthumb -DCPP_HEAP_EXCEPTIONS")
 set(CMAKE_EXE_LINKER_FLAGS
     "${CMAKE_EXE_LINKER_FLAGS} -nostdlib -Xlinker --Map=${EXECUTABLE_OUTPUT_PATH}/${CMAKE_PROJECT_NAME}.map -Xlinker --gc-sections")
 set(CMAKE_EXE_LINKER_FLAGS

@@ -25,12 +25,23 @@ extern "C" int __aeabi_atexit(void *object,
     return 0;
 }
 
+namespace __gnu_cxx
+{
+    void __verbose_terminate_handler()
+    {
+        for (;;)
+        ;
+    }
+}
+
 void *operator new(size_t size) {
 #ifndef CPP_NO_HEAP
     void *ptr = malloc(size);
 
+#ifdef CPP_HEAP_EXCEPTIONS
     if (ptr == 0)
         throw std::bad_alloc();
+#endif
 
     return ptr;
 #else
@@ -48,8 +59,10 @@ void *operator new[](size_t size) {
 #ifndef CPP_NO_HEAP
     void *ptr = malloc(size);
 
+#ifdef CPP_HEAP_EXCEPTIONS
     if (ptr == 0)
         throw std::bad_alloc();
+#endif
 
     return ptr;
 #else
