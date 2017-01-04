@@ -24,8 +24,9 @@
 
 namespace osapi {
 
-timer::timer() : _is_async(false),
-                 _priv_data(nullptr)
+timer::timer(int &id) : _id(id),
+                        _is_async(false),
+                        _priv_data(nullptr)
 {
 };
 

@@ -37,7 +37,7 @@ class timer {
     void *_priv_data;
 
 public:
-    timer();
+    explicit timer(int &id);
 
     ~timer();
 
@@ -59,7 +59,8 @@ class timerpool {
         bool acquired;
         bool auto_return;
 
-        timerinfo(int id) : id(id),
+        timerinfo(int id) : tmr(id),
+                            id(id),
                             acquired(false),
                             auto_return(false)
                             {};
@@ -83,7 +84,6 @@ public:
 
         for (int i = 0; i < max_timers; i++) {
             tmri = autoptr<timerinfo>(new timerinfo(i));
-            tmri->tmr._id = i;
             tmri->tmr._pool = this;
             _tmrs_info.push_back(tmri);
         }

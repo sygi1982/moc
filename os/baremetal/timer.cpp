@@ -25,8 +25,9 @@ namespace osapi {
 
 using namespace halapi;
 
-timer::timer() : _is_async(false),
-                 _priv_data(nullptr)
+timer::timer(int &id) : _id(id),
+                        _is_async(false),
+                        _priv_data(nullptr)
 {
     _priv_data = static_cast<void *>(new hwtmr(_id));
     assert(_priv_data);
