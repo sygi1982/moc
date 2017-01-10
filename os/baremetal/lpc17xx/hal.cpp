@@ -19,6 +19,8 @@
 #include "irqmgr.hpp"
 #include "hwtmr.hpp"
 
+#include "lpc17xx_can.h"
+
 namespace halapi {
 
 /* Hardware timers */
@@ -26,6 +28,7 @@ void hwtmr::start(int msecs, std::function<void()> delegate)
 {
     irqmgr::get_instance().register_int(_id, delegate);
     //TODO: call plat C function
+    CAN_Init(LPC_CAN1, 125000);
 };
 
 void hwtmr::stop()
@@ -80,6 +83,11 @@ void raise_int(int num)
 extern "C" void TIMER0_IRQHandler(void)
 {
     raise_int(0);
+}
+
+extern "C" void CAN_IRQHandler(void)
+{
+    raise_int(1);
 }
 
 }

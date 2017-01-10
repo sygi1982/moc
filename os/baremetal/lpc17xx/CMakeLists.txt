@@ -5,6 +5,7 @@ project(PlatLib)
 set(C_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/syscalls.c
     ${CMAKE_CURRENT_SOURCE_DIR}/target.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/system_LPC17xx.c
     ${CMAKE_CURRENT_SOURCE_DIR}/ft245.c
 )
 
@@ -18,6 +19,11 @@ set(PLAT_SRCS ${C_SRCS} ${CPP_SRCS})
 
 # local includes
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
+
+# CMSIS
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cmsis/Drivers/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cmsis/Core/Device/NXP/LPC17xx/Include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cmsis/Core/CMSIS/Include)
 
 set(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} -mcpu=cortex-m3 -mthumb")
@@ -41,6 +47,8 @@ target_link_libraries(${EXE_NAME}
                       ${CMAKE_CURRENT_SOURCE_DIR}/lib/libg_newlib.a)
 target_link_libraries(${EXE_NAME}
                       ${CMAKE_CURRENT_SOURCE_DIR}/lib/libm_newlib.a)
+target_link_libraries(${EXE_NAME}
+                      ${CMAKE_CURRENT_SOURCE_DIR}/lib/DriversLPC17xxgnu.a)
 
 # create flash files during post-build
 add_custom_command(

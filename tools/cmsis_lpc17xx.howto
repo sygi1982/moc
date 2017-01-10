@@ -1,0 +1,6 @@
+1. Download CMSIS lib -> wget https://www.lpcware.com/system/files/lpc175x_6x_cmsis_driver_library_0.zip and unzip
+2. Setup makesection/makeconfig -> PROJ_ROOT to $(PWD) and TOOL_ROOT to none, set proper toolchain path -> GNU_INSTALL_ROOT & GNU_VERSION
+3. Fix Windows name problem -> ln -s --relative ./Core/Device/NXP/LPC17xx/Include/system_LPC17xx.h ./Core/Device/NXP/LPC17xx/Include/system_lpc17xx.h
+4. Edit and remove "" from all tools definition -> makesection/makerule/LPC17xx/make.LPC17xx.gnu:82 eg. AR = $(GNUTOOLS)/arm-none-eabi-ar -r
+5. Setup conf in Drivers/include/lpc17xx_libcfg_default.h
+6. make
