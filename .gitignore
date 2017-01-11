@@ -1,0 +1,11 @@
+*.[1-9]
+*.a
+*.d
+*.o
+*.lo
+*.la
+tags
+TAGS
+*~
+dep.wrn
+.depend
