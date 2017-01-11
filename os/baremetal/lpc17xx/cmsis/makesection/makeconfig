@@ -1,0 +1,25 @@
+########################################################################
+#
+# Configuration file for "make" session. 
+#
+########################################################################
+
+########################################################################
+#
+# Note: 
+# Add path of "tools" directory (in this folder) 
+# to the HEAD of SYSTEM PATH variable
+#
+########################################################################
+
+PROJ_ROOT			=$(PWD)
+DEVICE				=LPC17xx
+MANUFACTURE			=NXP
+TOOL 				=gnu
+DEBUG_MODE			=0
+#TOOLS_PATH 			=$(PROJ_ROOT)/makesection/tools/
+TOOLS_PATH 			=
+
+
+GNU_INSTALL_ROOT	=$(TOOLCHAIN_PATH)
+GNU_VERSION			=$(TOOLCHAIN_VER)

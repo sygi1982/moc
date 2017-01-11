@@ -4,7 +4,7 @@ project(PlatLib)
 
 set(C_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/syscalls.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/target.c
+	#    ${CMAKE_CURRENT_SOURCE_DIR}/target.c
     ${CMAKE_CURRENT_SOURCE_DIR}/system_LPC17xx.c
     ${CMAKE_CURRENT_SOURCE_DIR}/ft245.c
 )
@@ -20,7 +20,7 @@ set(PLAT_SRCS ${C_SRCS} ${CPP_SRCS})
 # local includes
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
-# CMSIS
+# CMSIS includes
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cmsis/Drivers/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cmsis/Core/Device/NXP/LPC17xx/Include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cmsis/Core/CMSIS/Include)
@@ -41,14 +41,31 @@ set(EXE_NAME
 
 add_executable(${EXE_NAME} ${ALL_SRCS} ${OS_SRCS} ${PLAT_SRCS})
 
+set(CMSIS_NAME
+    DriversLPC17xxgnu.a)
+
+if (BUILD_CMSIS)
+    add_custom_target(
+        cmsis
+#        COMMAND make CC=${CMAKE_C_COMPILER} CFLAGS=${CMAKE_C_FLAGS} OBJDIR=${CMAKE_CURRENT_BINARY_DIR} OUTDIR=${LIBRARY_OUTPUT_PATH}
+        COMMAND make TOOLCHAIN_PATH=${TOOLCHAIN_ROOT} TOOLCHAIN_VER=${TOOLCHAIN_VERSION}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cmsis
+    )
+
+    add_dependencies(${EXE_NAME} cmsis)
+    target_link_libraries(${EXE_NAME}
+                          ${CMAKE_CURRENT_SOURCE_DIR}/cmsis/Drivers/library/${CMSIS_NAME})
+else()
+    target_link_libraries(${EXE_NAME}
+                          ${CMAKE_CURRENT_SOURCE_DIR}/lib/${CMSIS_NAME})
+endif()
+
 target_link_libraries(${EXE_NAME}
                       ${CMAKE_CURRENT_SOURCE_DIR}/lib/libc_newlib.a)
 target_link_libraries(${EXE_NAME}
                       ${CMAKE_CURRENT_SOURCE_DIR}/lib/libg_newlib.a)
 target_link_libraries(${EXE_NAME}
                       ${CMAKE_CURRENT_SOURCE_DIR}/lib/libm_newlib.a)
-target_link_libraries(${EXE_NAME}
-                      ${CMAKE_CURRENT_SOURCE_DIR}/lib/DriversLPC17xxgnu.a)
 
 # create flash files during post-build
 add_custom_command(
