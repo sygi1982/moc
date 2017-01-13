@@ -18,31 +18,24 @@
 
 #include "irqmgr.hpp"
 #include "hwtmr.hpp"
+#include "hwcan.hpp"
+#include "hwser.hpp"
 
 namespace halapi {
-
-/* Hardware timers */
-void hwtmr::start(int msecs, std::function<void()> delegate)
-{
-    irqmgr::get_instance().register_int(_id, delegate);
-};
-
-void hwtmr::stop()
-{
-    irqmgr::get_instance().unregister_int(_id);
-};
 
 /* Interrupt controller */
 void irqmgr::register_int(const int num, std::function<void()> handler)
 {
     assert(handler);
     _handlers.insert(std::pair<int, std::function<void()>>(num, handler));
+    //TODO: call plat C function ???
 }
 
 void irqmgr::unregister_int(const int num)
 {
     auto it = _handlers.find(num);
     _handlers.erase(it);
+    //TODO: call plat C function ???
 }
 
 void irqmgr::handle_int(int num)
@@ -54,20 +47,108 @@ void irqmgr::handle_int(int num)
 
 void irqmgr::ints_ena()
 {
+    __enable_irq();
 }
 
 void irqmgr::ints_dis()
 {
+    __disable_irq();
 }
 
 void irqmgr::wfi()
 {
+    __WFI();
 }
 
 /* This is irqmgr proxy function */
 void raise_int(int num)
 {
     irqmgr::get_instance().handle_int(num);
+}
+
+extern "C" void TIMER0_IRQHandler(void)
+{
+    raise_int(static_cast<int>(irqsrc::TIMER0));
+}
+
+extern "C" void TIMER1_IRQHandler(void)
+{
+    raise_int(static_cast<int>(irqsrc::TIMER1));
+}
+
+extern "C" void TIMER2_IRQHandler(void)
+{
+    raise_int(static_cast<int>(irqsrc::TIMER2));
+}
+
+extern "C" void TIMER3_IRQHandler(void)
+{
+    raise_int(static_cast<int>(irqsrc::TIMER3));
+}
+
+extern "C" void CAN_IRQHandler(void)
+{
+    raise_int(static_cast<int>(irqsrc::CAN));
+}
+
+extern "C" void UART0_IRQHandler(void)
+{
+    raise_int(static_cast<int>(irqsrc::UART0));
+}
+
+/* Hardware timers */
+void hwtmr::start(int msecs, std::function<void()> delegate)
+{
+    int irq = static_cast<int>(irqsrc::TIMER0) + _id;
+    irqmgr::get_instance().register_int(irq, delegate);
+    //TODO: call plat C function
+};
+
+void hwtmr::stop()
+{
+    int irq = static_cast<int>(irqsrc::TIMER0) + _id;
+    irqmgr::get_instance().unregister_int(irq);
+    //TODO: call plat C function
+};
+
+hwcan::hwcan(std::function<void(HWCAN_DAT &d)> handler)
+{
+    auto irq_routine = [this, handler] () {
+        //TODO: call plat C function, read registers
+        HWCAN_DAT d;
+        handler(d);
+    };
+    irqmgr::get_instance().register_int(static_cast<int>(irqsrc::CAN), irq_routine);
+}
+
+hwcan::~hwcan()
+{
+    irqmgr::get_instance().unregister_int(static_cast<int>(irqsrc::CAN));
+}
+
+void hwcan::send(HWCAN_DAT &d)
+{
+    //TODO: call plat C function
+}
+
+hwser::hwser(std::function<void(HWSER_DAT &d)> handler)
+{
+    auto irq_routine = [this, handler] () {
+        //TODO: call plat C function, read registers
+        HWSER_DAT d;
+        handler(d);
+    };
+    irqmgr::get_instance().register_int(static_cast<int>(irqsrc::UART0), irq_routine);
+}
+
+hwser::~hwser()
+{
+    irqmgr::get_instance().unregister_int(static_cast<int>(irqsrc::UART0));
+}
+
+void hwser::send(HWSER_DAT &d)
+{
+    //TODO: call plat C function
 }
 
 }
