@@ -16,7 +16,6 @@
  */
 #include <cassert>
 
-#include "ports.hpp"
 #include "irqmgr.hpp"
 #include "hwtmr.hpp"
 #include "hwcan.hpp"
@@ -36,14 +35,14 @@ void irqmgr::register_int(const int num, std::function<void()> handler)
 {
     assert(handler);
     _handlers.insert(std::pair<int, std::function<void()>>(num, handler));
-    //TODO: call plat C function
+    //TODO: call plat C function ???
 }
 
 void irqmgr::unregister_int(const int num)
 {
     auto it = _handlers.find(num);
     _handlers.erase(it);
-    //TODO: call plat C function
+    //TODO: call plat C function ???
 }
 
 void irqmgr::handle_int(int num)
@@ -119,36 +118,44 @@ void hwtmr::stop()
     //TODO: call plat C function
 };
 
-hwcan::hwcan()
+hwcan::hwcan(std::function<void(HWCAN_DAT &d)> handler)
 {
-    //irqmgr::get_instance().register_int(static_cast<int>(irqsrc::CAN));
-
+    auto irq_routine = [this, handler] () {
+        //TODO: call plat C function, read registers
+        HWCAN_DAT d;
+        handler(d);
+    };
+    irqmgr::get_instance().register_int(static_cast<int>(irqsrc::CAN), irq_routine);
 }
 
 hwcan::~hwcan()
 {
-    //irqmgr::get_instance().unregister_int(static_cast<int>(irqsrc::CAN));
-
+    irqmgr::get_instance().unregister_int(static_cast<int>(irqsrc::CAN));
 }
 
-void hwcan::send()
+void hwcan::send(HWCAN_DAT &d)
 {
-
+    //TODO: call plat C function
 }
 
-hwser::hwser()
+hwser::hwser(std::function<void(HWSER_DAT &d)> handler)
 {
-    //irqmgr::get_instance().register_int(static_cast<int>(irqsrc::UART0));
+    auto irq_routine = [this, handler] () {
+        //TODO: call plat C function, read registers
+        HWSER_DAT d;
+        handler(d);
+    };
+    irqmgr::get_instance().register_int(static_cast<int>(irqsrc::UART0), irq_routine);
 }
 
 hwser::~hwser()
 {
-    //irqmgr::get_instance().unregister_int(static_cast<int>(irqsrc::UART0));
+    irqmgr::get_instance().unregister_int(static_cast<int>(irqsrc::UART0));
 }
 
-void hwser::send()
+void hwser::send(HWSER_DAT &d)
 {
-
+    //TODO: call plat C function
 }
 
 }

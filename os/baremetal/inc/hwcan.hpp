@@ -17,18 +17,20 @@
 #ifndef __HWCAN_HPP__
 #define __HWCAN_HPP__
 
-#include "ports.hpp"
+#include <functional>
 
 namespace halapi {
+
+typedef unsigned char HWCAN_DAT;
 
 class hwcan {
 
 public:
-    hwcan();
+    hwcan(std::function<void(HWCAN_DAT &d)> handler);
 
     ~hwcan();
 
-    void send();
+    void send(HWCAN_DAT &d);
 
 };
 

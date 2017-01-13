@@ -17,18 +17,20 @@
 #ifndef __HWSER_HPP__
 #define __HWSER_HPP__
 
-#include "ports.hpp"
+#include <functional>
 
 namespace halapi {
+
+typedef unsigned char HWSER_DAT;
 
 class hwser {
 
 public:
-    hwser();
+    hwser(std::function<void(HWSER_DAT &d)> handler);
 
     ~hwser();
 
-    void send();
+    void send(HWSER_DAT &d);
 
 };
 

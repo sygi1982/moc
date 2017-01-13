@@ -14,7 +14,6 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "egos.hpp"
 #include "ports.hpp"
 #include "hwcan.hpp"
@@ -41,8 +40,16 @@ void generic_port_watcher::frame_received(port *owner, frame &f) const
 bool serial_port::init()
 {
     egos::prints("serial init\n");
-    _priv_data = static_cast<void *>(new hwser());
+
+    auto ser_handler = [this] (HWSER_DAT &d) {
+        SER_FRAME sf;
+        sf._data = d;
+        // TODO: make frame constructor to pass data
+        this->_rcv->frame_received(this, sf);
+    };
+    _priv_data = static_cast<void *>(new hwser(ser_handler));
     assert(_priv_data);
+
     return _priv_data != nullptr;
 }
 
@@ -57,8 +64,17 @@ void serial_port::deinit()
 bool can_port::init()
 {
     egos::prints("can init\n");
-    _priv_data = static_cast<void *>(new hwcan());
+
+    auto can_handler = [this] (HWCAN_DAT &d) {
+        CAN_FRAME cf;
+        cf._id = d;
+        // TODO: pass is data & flags
+        // TODO: make frame constructor to pass data
+        this->_rcv->frame_received(this, cf);
+    };
+    _priv_data = static_cast<void *>(new hwcan(can_handler));
     assert(_priv_data);
+
     return _priv_data != nullptr;
 }
 
@@ -74,10 +90,7 @@ bool serial_port::send_frame(frame &f)
 {
     SER_FRAME &sf = static_cast<SER_FRAME&>(f);
     hwser *ser = static_cast<hwser *>(_priv_data);
-    // TODO: this is for test only
-    //(_rcv)->frame_received(this, f);
-    // TODO: use serial specific stuff
-    ser->send();
+    ser->send(sf._data);
 
     return true;
 }
@@ -86,10 +99,8 @@ bool can_port::send_frame(frame &f)
 {
     CAN_FRAME &cf = static_cast<CAN_FRAME&>(f);
     hwcan *can = static_cast<hwcan *>(_priv_data);
-    // TODO: this is for test only
-    //(_rcv)->frame_received(this, f);
-    // TODO: use can specific stuff
-    can->send();
+    // TODO: pass is data & flags
+    //can->send(0);
 
     return true;
 }
