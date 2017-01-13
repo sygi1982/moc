@@ -17,8 +17,6 @@
 #ifndef __HWTMR_HPP__
 #define __HWTMR_HPP__
 
-#include "irqmgr.hpp"
-
 namespace halapi {
 
 class hwtmr {

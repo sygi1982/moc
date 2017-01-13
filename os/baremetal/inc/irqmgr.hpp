@@ -26,6 +26,15 @@ namespace halapi {
 
 using namespace utils;
 
+enum class irqsrc : int {
+    UART0 = 0,
+    CAN = 1,
+    TIMER0 = 2,
+    TIMER1 = 3,
+    TIMER2 = 4,
+    TIMER3 = 5
+};
+
 class irqmgr : public singleton<irqmgr> {
     std::map<int, std::function<void()>> _handlers;
 

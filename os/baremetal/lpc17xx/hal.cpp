@@ -16,26 +16,20 @@
  */
 #include <cassert>
 
+#include "ports.hpp"
 #include "irqmgr.hpp"
 #include "hwtmr.hpp"
-
+#include "hwcan.hpp"
+#include "hwser.hpp"
+#include "LPC17xx.h"
+#include "core_cm3.h"
+#include "core_cmInstr.h"
+#include "core_cmFunc.h"
 #include "lpc17xx_can.h"
+#include "lpc17xx_timer.h"
+#include "lpc17xx_uart.h"
 
 namespace halapi {
-
-/* Hardware timers */
-void hwtmr::start(int msecs, std::function<void()> delegate)
-{
-    irqmgr::get_instance().register_int(_id, delegate);
-    //TODO: call plat C function
-    CAN_Init(LPC_CAN1, 125000);
-};
-
-void hwtmr::stop()
-{
-    irqmgr::get_instance().unregister_int(_id);
-    //TODO: call plat C function
-};
 
 /* Interrupt controller */
 void irqmgr::register_int(const int num, std::function<void()> handler)
@@ -61,17 +55,17 @@ void irqmgr::handle_int(int num)
 
 void irqmgr::ints_ena()
 {
-    //TODO: call plat C function
+    __enable_irq();
 }
 
 void irqmgr::ints_dis()
 {
-    //TODO: call plat C function
+    __disable_irq();
 }
 
 void irqmgr::wfi()
 {
-    //TODO: call plat C function
+    __WFI();
 }
 
 /* This is irqmgr proxy function */
@@ -82,12 +76,79 @@ void raise_int(int num)
 
 extern "C" void TIMER0_IRQHandler(void)
 {
-    raise_int(0);
+    raise_int(static_cast<int>(irqsrc::TIMER0));
+}
+
+extern "C" void TIMER1_IRQHandler(void)
+{
+    raise_int(static_cast<int>(irqsrc::TIMER1));
+}
+
+extern "C" void TIMER2_IRQHandler(void)
+{
+    raise_int(static_cast<int>(irqsrc::TIMER2));
+}
+
+extern "C" void TIMER3_IRQHandler(void)
+{
+    raise_int(static_cast<int>(irqsrc::TIMER3));
 }
 
 extern "C" void CAN_IRQHandler(void)
 {
-    raise_int(1);
+    raise_int(static_cast<int>(irqsrc::CAN));
+}
+
+extern "C" void UART0_IRQHandler(void)
+{
+    raise_int(static_cast<int>(irqsrc::UART0));
+}
+
+/* Hardware timers */
+void hwtmr::start(int msecs, std::function<void()> delegate)
+{
+    int irq = static_cast<int>(irqsrc::TIMER0) + _id;
+    irqmgr::get_instance().register_int(irq, delegate);
+    //TODO: call plat C function
+};
+
+void hwtmr::stop()
+{
+    int irq = static_cast<int>(irqsrc::TIMER0) + _id;
+    irqmgr::get_instance().unregister_int(irq);
+    //TODO: call plat C function
+};
+
+hwcan::hwcan()
+{
+    //irqmgr::get_instance().register_int(static_cast<int>(irqsrc::CAN));
+
+}
+
+hwcan::~hwcan()
+{
+    //irqmgr::get_instance().unregister_int(static_cast<int>(irqsrc::CAN));
+
+}
+
+void hwcan::send()
+{
+
+}
+
+hwser::hwser()
+{
+    //irqmgr::get_instance().register_int(static_cast<int>(irqsrc::UART0));
+}
+
+hwser::~hwser()
+{
+    //irqmgr::get_instance().unregister_int(static_cast<int>(irqsrc::UART0));
+}
+
+void hwser::send()
+{
+
 }
 
 }
