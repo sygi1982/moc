@@ -17,8 +17,12 @@
 
 #include "egos.hpp"
 #include "ports.hpp"
+#include "hwcan.hpp"
+#include "hwser.hpp"
 
 namespace osapi {
+
+using namespace halapi;
 
 void generic_port_watcher::frame_received(port *owner, frame &f) const
 {
@@ -30,48 +34,62 @@ void generic_port_watcher::frame_received(port *owner, frame &f) const
         egos::prints(" can frame handled 0x%x!\n", cf._id);
     }
 
-    // TODO: filter ?
-
+    // TODO: filter out ?
     owner->call_handler(f);
 }
 
 bool serial_port::init()
 {
     egos::prints("serial init\n");
-    return true;
+    _priv_data = static_cast<void *>(new hwser());
+    assert(_priv_data);
+    return _priv_data != nullptr;
 }
 
 void serial_port::deinit()
 {
     egos::prints("serial deinit\n");
+    hwser *ser = static_cast<hwser *>(_priv_data);
+    if (ser)
+        delete ser;
 }
 
 bool can_port::init()
 {
     egos::prints("can init\n");
-    return true;
+    _priv_data = static_cast<void *>(new hwcan());
+    assert(_priv_data);
+    return _priv_data != nullptr;
 }
 
 void can_port::deinit()
 {
     egos::prints("can deinit\n");
+    hwcan *can = static_cast<hwcan *>(_priv_data);
+    if (can)
+        delete can;
 }
-
 
 bool serial_port::send_frame(frame &f)
 {
+    SER_FRAME &sf = static_cast<SER_FRAME&>(f);
+    hwser *ser = static_cast<hwser *>(_priv_data);
     // TODO: this is for test only
-    (_rcv)->frame_received(this, f);
+    //(_rcv)->frame_received(this, f);
     // TODO: use serial specific stuff
+    ser->send();
 
     return true;
 }
 
 bool can_port::send_frame(frame &f)
 {
+    CAN_FRAME &cf = static_cast<CAN_FRAME&>(f);
+    hwcan *can = static_cast<hwcan *>(_priv_data);
     // TODO: this is for test only
-    (_rcv)->frame_received(this, f);
+    //(_rcv)->frame_received(this, f);
     // TODO: use can specific stuff
+    can->send();
 
     return true;
 }

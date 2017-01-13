@@ -19,6 +19,7 @@
 
 #include <functional>
 #include <string>
+#include <vector>
 
 namespace osapi {
 
@@ -41,7 +42,8 @@ public:
         _rcv(rcv),
         _idx(-1),
         _baudrate(baudrate),
-        _attached(false) {
+        _attached(false),
+        _priv_data(nullptr) {
     };
 
     virtual ~port() {};
@@ -67,6 +69,7 @@ protected:
     int _idx;
     int _baudrate;
     bool _attached;
+    void *_priv_data;
 
 };
 
