@@ -29,7 +29,8 @@ timer::timer(int &id) : _id(id),
                         _is_async(false),
                         _priv_data(nullptr)
 {
-    _priv_data = static_cast<void *>(new hwtmr(_id));
+    _priv_data = static_cast<void *>(new hwtmr(_id,
+        [] () { ;} ));  // dummy handler
     assert(_priv_data);
 };
 

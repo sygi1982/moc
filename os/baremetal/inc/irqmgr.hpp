@@ -47,6 +47,8 @@ public:
 
     void register_int(const int num, std::function<void()> handler);
 
+    void update_int(const int num, std::function<void()> handler);
+
     void unregister_int(const int num);
 
     void ints_ena();

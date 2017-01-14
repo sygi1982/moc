@@ -34,8 +34,21 @@ namespace halapi {
 void irqmgr::register_int(const int num, std::function<void()> handler)
 {
     assert(handler);
-    _handlers.insert(std::pair<int, std::function<void()>>(num, handler));
+    _handlers.insert(std::pair<int,
+        std::function<void()>>(num, handler));
     //TODO: call plat C function ???
+}
+
+void irqmgr::update_int(const int num, std::function<void()> handler)
+{
+    auto it = _handlers.find(num);
+
+    if (it != _handlers.end()) {
+        assert(handler);
+        it->second = handler;
+    } else {
+        assert(false);
+    }
 }
 
 void irqmgr::unregister_int(const int num)
@@ -104,17 +117,27 @@ extern "C" void UART0_IRQHandler(void)
 }
 
 /* Hardware timers */
+hwtmr::hwtmr(int &id, std::function<void()> delegate) : _id(id)
+{
+    int irq = static_cast<int>(irqsrc::TIMER0) + id;
+    irqmgr::get_instance().register_int(irq, delegate);
+}
+
+hwtmr::~hwtmr()
+{
+    int irq = static_cast<int>(irqsrc::TIMER0) + _id;
+    irqmgr::get_instance().unregister_int(irq);
+}
+
 void hwtmr::start(int msecs, std::function<void()> delegate)
 {
     int irq = static_cast<int>(irqsrc::TIMER0) + _id;
-    irqmgr::get_instance().register_int(irq, delegate);
+    irqmgr::get_instance().update_int(irq, delegate);
     //TODO: call plat C function
 };
 
 void hwtmr::stop()
 {
-    int irq = static_cast<int>(irqsrc::TIMER0) + _id;
-    irqmgr::get_instance().unregister_int(irq);
     //TODO: call plat C function
 };
 
@@ -125,12 +148,15 @@ hwcan::hwcan(std::function<void(HWCAN_DAT &d)> handler)
         HWCAN_DAT d;
         handler(d);
     };
-    irqmgr::get_instance().register_int(static_cast<int>(irqsrc::CAN), irq_routine);
+
+    irqmgr::get_instance().register_int(
+        static_cast<int>(irqsrc::CAN), irq_routine);
 }
 
 hwcan::~hwcan()
 {
-    irqmgr::get_instance().unregister_int(static_cast<int>(irqsrc::CAN));
+    irqmgr::get_instance().unregister_int(
+        static_cast<int>(irqsrc::CAN));
 }
 
 void hwcan::send(HWCAN_DAT &d)
@@ -145,12 +171,15 @@ hwser::hwser(std::function<void(HWSER_DAT &d)> handler)
         HWSER_DAT d;
         handler(d);
     };
-    irqmgr::get_instance().register_int(static_cast<int>(irqsrc::UART0), irq_routine);
+
+    irqmgr::get_instance().register_int(
+        static_cast<int>(irqsrc::UART0), irq_routine);
 }
 
 hwser::~hwser()
 {
-    irqmgr::get_instance().unregister_int(static_cast<int>(irqsrc::UART0));
+    irqmgr::get_instance().unregister_int(
+        static_cast<int>(irqsrc::UART0));
 }
 
 void hwser::send(HWSER_DAT &d)

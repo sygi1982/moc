@@ -23,7 +23,9 @@ class hwtmr {
     int _id;
 
 public:
-    hwtmr(int id) : _id(id) {};
+    explicit hwtmr(int &id, std::function<void()> delegate);
+
+    ~hwtmr();
 
     void start(int msecs, std::function<void()> delegate);
 
