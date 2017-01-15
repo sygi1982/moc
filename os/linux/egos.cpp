@@ -68,7 +68,11 @@ void egos::initialize(int &argc, char **argv, int guard_period)
     _main_looper = std::unique_ptr<superloop>(new superloop());
     _timers = std::unique_ptr<timerpool>(new timerpool(16));
 
-    _serial_port = autoptr<port>(new serial_port("sp"));
+    {
+        auto serp =
+            opts.ports.find(static_cast<uint8_t>(comm_ports::SERIAL_PORT));
+        _serial_port = autoptr<port>(new serial_port(serp->second.c_str()));
+    }
     _can_port = autoptr<port>(new can_port("cp"));
 
     setup_guard(guard_period);

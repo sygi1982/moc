@@ -40,12 +40,16 @@ public:
     bool utilize() {
         workitem::utilize();
         egos::prints(" delayed_work %u utilize\n", workitem::get_id());
-        egos *os_api = &egos::get_instance();
+        /*egos *os_api = &egos::get_instance();
         auto canp = os_api->get_port(comm_ports::CAN_PORT);
         CAN_FRAME cf;
         cf._id = 0x11111111;
         cf._timestamp = 0x22222222;
         canp->send_frame(cf);
+        auto serp = os_api->get_port(comm_ports::SERIAL_PORT);
+        SER_FRAME sf;
+        sf._data = 0x55;
+        serp->send_frame(sf);*/
         return true;
     }
 };
@@ -68,8 +72,14 @@ int main(int argc, char **argv)
     os_api->introduce_self();
 
     auto serp = os_api->get_port(comm_ports::SERIAL_PORT);
+    auto ser_handler = [&os_api] (frame &f) {
+        egos::prints(" serial frame received %d!\n", static_cast<SER_FRAME *>(&f)->_data);
+        autoitem item(new delayed_work(1));
+        os_api->process_delayed(item, 1000);
+    };
+    serp->set_handler(ser_handler);
     SER_FRAME sf;
-    sf._data = 0;
+    sf._data = 0xAA;
     serp->send_frame(sf);
 
     auto canp = os_api->get_port(comm_ports::CAN_PORT);
@@ -83,10 +93,9 @@ int main(int argc, char **argv)
     cf._id = 0x11111111;
     cf._timestamp = 0x22222222;
     canp->send_frame(cf);
-//    canp.reset();
 
     try {
-        autoitem item(new delayed_work(2));
+        autoitem item(new delayed_work(0));
         item.get_raw();
         os_api->process_delayed(item, 2000);
     } catch (std::bad_alloc &e) {

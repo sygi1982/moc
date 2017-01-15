@@ -38,7 +38,8 @@ class port {
     std::function<void(frame &f)> _handler;
 
 public:
-    port(port_clbk_if *rcv, int baudrate) :
+    port(std::string name, port_clbk_if *rcv, int baudrate) :
+        _name(name),
         _rcv(rcv),
         _idx(-1),
         _baudrate(baudrate),
@@ -65,6 +66,7 @@ public:
     }
 
 protected:
+    std::string _name;
     port_clbk_if *_rcv;
     int _idx;
     int _baudrate;
@@ -99,7 +101,7 @@ class can_port : public port
 
 public:
     inline can_port(std::string name, int baudrate, can_mode mode) :
-        port(new generic_port_watcher, baudrate), _mode(mode) {
+        port(name, new generic_port_watcher, baudrate), _mode(mode) {
 
         if (init())
             _attached = true;
@@ -130,7 +132,7 @@ class serial_port : public port
 
 public:
     inline serial_port(std::string name, int baudrate) :
-        port(new generic_port_watcher, baudrate) {
+        port(name, new generic_port_watcher, baudrate) {
 
         if (init())
             _attached = true;
