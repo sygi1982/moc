@@ -23,20 +23,6 @@ namespace osapi {
 
 using namespace halapi;
 
-void generic_port_watcher::frame_received(port *owner, frame &f) const
-{
-    if (typeid(*owner) == typeid(serial_port)) {
-        SER_FRAME &sf = static_cast<SER_FRAME&>(f);
-        egos::prints(" serial frame handled 0x%x!\n", sf._data);
-    } else if (typeid(*owner) == typeid(can_port)) {
-        CAN_FRAME &cf = static_cast<CAN_FRAME&>(f);
-        egos::prints(" can frame handled 0x%x!\n", cf._id);
-    }
-
-    // TODO: filter out ?
-    owner->call_handler(f);
-}
-
 bool serial_port::init()
 {
     egos::prints("serial init\n");

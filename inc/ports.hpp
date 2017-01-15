@@ -83,7 +83,9 @@ struct CAN_FRAME : frame {
 
 struct generic_port_watcher : port_clbk_if
 {
-    void frame_received(port *owner, frame &f) const;
+    void frame_received(port *owner, frame &f) const {
+        owner->call_handler(f);
+    }
 };
 
 enum class can_mode : uint8_t {
