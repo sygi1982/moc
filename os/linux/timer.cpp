@@ -56,6 +56,7 @@ void timer::cancel_async()
     std::thread *handler = static_cast<std::thread *>(_priv_data);
     assert(handler);
     handler->detach();
+    delete handler;
 };
 
 void timer::wait_sync(int msecs)
