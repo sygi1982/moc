@@ -70,13 +70,19 @@ public:
                 if (_stopped)
                     break;
 
+                if (_queue.empty())
+                    assert(false); // bug
+
                 auto item = _queue.front();
                 lk.unlock();
 
                 item->utilize();
 
                 lk.lock();
-                _queue.pop_front();
+                /* We may stopped and cleared the
+                   queue during item utilisation */
+                if (!_queue.empty())
+                    _queue.pop_front();
             }
         };
     }

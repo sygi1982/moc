@@ -86,6 +86,11 @@ void egos::start()
     looper.join();
 };
 
+void egos::finilize()
+{
+    _main_looper->stop();
+};
+
 void egos::parse_opts(const char *app)
 {
     if (opts.check_opt("-help")) {

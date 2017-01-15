@@ -79,7 +79,7 @@ class egos : public singleton<egos>, private watchdog::bark {
         if (_guard) {
             _watchdog = autoptr<watchdog>(new watchdog(
                 static_cast<watchdog::bark&>(*this)));
-            /* Excplictly own the timer */
+            /* Explicitly own the timer */
             timer *tmr = _timers->get_timer(false);
 
             _watchdog->watch(tmr, period);
@@ -90,6 +90,8 @@ public:
     void initialize(int &argc, char **argv, int guard_period);
 
     void start();
+
+    void finilize();
 
     void process(autoitem item) {
 

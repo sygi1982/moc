@@ -14,6 +14,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <cassert>
 #include "egos.hpp"
 #include "looper.hpp"
 #include "workitem.hpp"
@@ -57,6 +58,11 @@ void egos::initialize(int &argc, char **argv, int guard_period)
 void egos::start()
 {
     _main_looper->run();
+};
+
+void egos::finilize()
+{
+    assert(false);
 };
 
 void egos::parse_opts(const char *app)
