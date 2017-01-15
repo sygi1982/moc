@@ -73,7 +73,11 @@ void egos::initialize(int &argc, char **argv, int guard_period)
             opts.ports.find(static_cast<uint8_t>(comm_ports::SERIAL_PORT));
         _serial_port = autoptr<port>(new serial_port(serp->second.c_str()));
     }
-    _can_port = autoptr<port>(new can_port("cp"));
+    {
+        auto canp =
+            opts.ports.find(static_cast<uint8_t>(comm_ports::CAN_PORT));
+        _can_port = autoptr<port>(new can_port(canp->second.c_str()));
+    }
 
     setup_guard(guard_period);
 }
