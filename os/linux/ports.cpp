@@ -30,6 +30,7 @@ struct serp {
     int trxfd;
     int exitfds[2];
     std::thread *handler;
+    bool exit;
 };
 
 bool serial_port::init()
@@ -48,19 +49,20 @@ bool serial_port::init()
     sp = new serp;
     assert(sp);
     sp->trxfd = fd;
+    sp->exit = false;
     assert(!pipe(sp->exitfds));
 
     sp->handler = new std::thread([this, sp]() {
             struct pollfd pfds[2];
 
-            while(true) {
+            while(!sp->exit) {
                 pfds[0].fd = sp->trxfd;
                 pfds[0].events = POLLIN;
                 pfds[1].fd = sp->exitfds[1];
-                pfds[1].events = POLLIN;
+                pfds[1].events = POLLHUP;
 
                 poll(pfds, 2, -1);
-                if (pfds[0].events & POLLIN) {
+                if (pfds[0].revents & POLLIN) {
                     char buf[1024];
 
                     int ret = read(sp->trxfd, buf, sizeof(buf));
@@ -71,10 +73,10 @@ bool serial_port::init()
                         sf._data = buf[i];
                         this->_rcv->frame_received(this, sf);
                     }
-                } else if (pfds[1].events & POLLIN) {
+                } else if (pfds[1].revents & POLLHUP) {
                     close(sp->exitfds[1]);
                     egos::prints("closing serial port\n");
-                    break;
+                    continue;
                 }
             }
         });
@@ -101,6 +103,7 @@ void serial_port::deinit()
     serp *sp = static_cast<serp *>(_priv_data);
 
     egos::prints("serial deinit\n");
+    sp->exit = true;
     close(sp->exitfds[0]);
     sp->handler->join();
     close(sp->trxfd);
