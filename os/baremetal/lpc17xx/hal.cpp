@@ -36,7 +36,16 @@ void irqmgr::register_int(const int num, std::function<void()> handler)
     assert(handler);
     _handlers.insert(std::pair<int,
         std::function<void()>>(num, handler));
-    //TODO: call plat C function ???
+
+    switch(static_cast<irqsrc>(num)) {
+        case irqsrc::TIMER0:
+            /* preemption = 1, sub-priority = 1 */
+            NVIC_SetPriority(TIMER0_IRQn, ((0x01<<3)|0x01));
+            /* Enable interrupt for timer 0 */
+            NVIC_EnableIRQ(TIMER0_IRQn);
+        default:
+            assert(false);
+    }
 }
 
 void irqmgr::update_int(const int num, std::function<void()> handler)
@@ -55,7 +64,14 @@ void irqmgr::unregister_int(const int num)
 {
     auto it = _handlers.find(num);
     _handlers.erase(it);
-    //TODO: call plat C function ???
+
+    switch(static_cast<irqsrc>(num)) {
+        case irqsrc::TIMER0:
+            /* Disable interrupt for timer 0 */
+            NVIC_DisableIRQ(TIMER0_IRQn);
+        default:
+            assert(false);
+    }
 }
 
 void irqmgr::handle_int(int num)
@@ -88,7 +104,12 @@ void raise_int(int num)
 
 extern "C" void TIMER0_IRQHandler(void)
 {
-    raise_int(static_cast<int>(irqsrc::TIMER0));
+    if (TIM_GetIntStatus(LPC_TIM0, TIM_MR0_INT)== SET) {
+        TIM_ClearIntPending(LPC_TIM0, TIM_MR0_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER0));
+    } else {
+        assert(false);  // spurious
+    }
 }
 
 extern "C" void TIMER1_IRQHandler(void)
@@ -117,6 +138,23 @@ extern "C" void UART0_IRQHandler(void)
 }
 
 /* Hardware timers */
+TIM_TIMERCFG_Type gTIM_ConfigStruct = {
+    // prescale count time of 100us
+    PrescaleOption : TIM_PRESCALE_USVAL,
+    { 0, 0, 0}, // rsvd
+    PrescaleValue : 100
+};
+
+TIM_MATCHCFG_Type gTIM_MatchConfigStruct = {
+    MatchChannel : 0,
+    IntOnMatch : TRUE,
+    StopOnMatch : TRUE,
+    ResetOnMatch : TRUE,
+    ExtMatchOutputType : FALSE,
+    { 0, 0, 0}, // rsvd
+    MatchValue : 10
+};
+
 hwtmr::hwtmr(int &id, std::function<void()> delegate) : _id(id)
 {
     int irq = static_cast<int>(irqsrc::TIMER0) + id;
@@ -133,12 +171,21 @@ void hwtmr::start(int msecs, std::function<void()> delegate)
 {
     int irq = static_cast<int>(irqsrc::TIMER0) + _id;
     irqmgr::get_instance().update_int(irq, delegate);
-    //TODO: call plat C function
+
+    // use channel 0, MR0
+    gTIM_MatchConfigStruct.MatchChannel = 0;
+    // Set Match value, count value of base 10 (10 * 100uS = 1000 = 1ms --> 1 kHz)
+    gTIM_MatchConfigStruct.MatchValue = 10 * msecs;
+    // Set configuration for Tim_config and Tim_MatchConfig
+    TIM_Init(LPC_TIM0, TIM_TIMER_MODE, &gTIM_ConfigStruct);
+    TIM_ConfigMatch(LPC_TIM0, &gTIM_MatchConfigStruct);
+    // To start timer 0
+    TIM_Cmd(LPC_TIM0, ENABLE);
 };
 
 void hwtmr::stop()
 {
-    //TODO: call plat C function
+    TIM_Cmd(LPC_TIM0, DISABLE);
 };
 
 hwcan::hwcan(std::function<void(HWCAN_DAT &d)> handler)
