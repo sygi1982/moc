@@ -20,6 +20,7 @@
 #include "egos.hpp"
 #include "timerpool.hpp"
 #include "hwtmr.hpp"
+#include "irqmgr.hpp"
 
 namespace osapi {
 
@@ -59,10 +60,19 @@ void timer::cancel_async()
 
 void timer::wait_sync(int msecs)
 {
+    bool done = false;
+
     egos::prints("wait_sync %u\n", msecs);
     _is_async = false;
-    // TODO: simple busy loop wait
+    hwtmr *tmr = static_cast<hwtmr *>(_priv_data);
+    tmr->start(msecs, [&done] () {
+            done = true;
+        });
 
+    while(!done)
+        irqmgr::get_instance().wfi();
+
+    tmr->stop();
     _pool->try_return(this);
 };
 
