@@ -68,8 +68,8 @@ bool serial_port::init()
                     int ret = read(sp->trxfd, buf, sizeof(buf));
                     egos::prints("received (%d) data\n", ret);
 
+                    SER_FRAME sf;
                     for(int i = 0; i <= ret; i++) {
-                        SER_FRAME sf;
                         sf._data = buf[i];
                         this->_rcv->frame_received(this, sf);
                     }
