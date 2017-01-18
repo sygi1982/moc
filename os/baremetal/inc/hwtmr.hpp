@@ -23,13 +23,13 @@ class hwtmr {
     int _id;
 
 public:
-    explicit hwtmr(int &id, std::function<void()> delegate);
+    explicit hwtmr(int &id);
 
     ~hwtmr();
 
     void start(int msecs, std::function<void()> delegate);
 
-    void stop();
+    void stop(bool force);
 
 };
 

@@ -29,10 +29,10 @@ using namespace utils;
 enum class irqsrc : int {
     UART0 = 0,
     CAN = 1,
-    TIMER0 = 2,
-    TIMER1 = 3,
-    TIMER2 = 4,
-    TIMER3 = 5
+    TIMER0 = 10,
+    TIMER1 = 14,
+    TIMER2 = 18,
+    TIMER3 = 22
 };
 
 class irqmgr : public singleton<irqmgr> {
@@ -40,9 +40,15 @@ class irqmgr : public singleton<irqmgr> {
 
     void handle_int(int num);
 
+    static const int MAX_GROUPS = 4;
+
+    int _group_ref[MAX_GROUPS]; /* Used for managing hw specific stuff */
+
 public:
     inline void initialize() {
         _handlers.clear();
+        for (int i = 0; i < MAX_GROUPS; i++)
+            _group_ref[i] = 0;
     }
 
     void register_int(const int num, std::function<void()> handler);

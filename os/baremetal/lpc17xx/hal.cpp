@@ -33,18 +33,38 @@ namespace halapi {
 /* Interrupt controller */
 void irqmgr::register_int(const int num, std::function<void()> handler)
 {
+    IRQn_Type irq = WDT_IRQn;
+
     assert(handler);
     _handlers.insert(std::pair<int,
         std::function<void()>>(num, handler));
+    int status = -1;
 
-    switch(static_cast<irqsrc>(num)) {
-        case irqsrc::TIMER0:
-            /* preemption = 1, sub-priority = 1 */
-            NVIC_SetPriority(TIMER0_IRQn, ((0x01<<3)|0x01));
-            /* Enable interrupt for timer 0 */
-            NVIC_EnableIRQ(TIMER0_IRQn);
-        default:
-            assert(false);
+    irqsrc src = static_cast<irqsrc>(num);
+    if (src == irqsrc::UART0)
+        irq = UART0_IRQn;
+    else if (src == irqsrc::CAN)
+        irq = CAN_IRQn;
+    else if (src >= irqsrc::TIMER0 && src < irqsrc::TIMER1) {
+        irq = TIMER0_IRQn;
+        status = _group_ref[0]++;
+    } else if (src >= irqsrc::TIMER1 && src < irqsrc::TIMER2) {
+        irq = TIMER1_IRQn;
+        status = _group_ref[1]++;
+    } else if (src >= irqsrc::TIMER2 && src < irqsrc::TIMER3) {
+        irq = TIMER2_IRQn;
+        status = _group_ref[2]++;
+    } else if (src >= irqsrc::TIMER3) {
+        irq = TIMER3_IRQn;
+        status = _group_ref[3]++;
+    } else
+        assert(false);
+
+    if (status <= 0) {
+        /* preemption = 1, sub-priority = 1 */
+        NVIC_SetPriority(irq, ((0x01<<3)|0x01));
+        /* Enable interrupt */
+        NVIC_EnableIRQ(irq);
     }
 }
 
@@ -62,16 +82,34 @@ void irqmgr::update_int(const int num, std::function<void()> handler)
 
 void irqmgr::unregister_int(const int num)
 {
+    IRQn_Type irq = WDT_IRQn;
     auto it = _handlers.find(num);
     _handlers.erase(it);
+    int status = -1;
 
-    switch(static_cast<irqsrc>(num)) {
-        case irqsrc::TIMER0:
-            /* Disable interrupt for timer 0 */
-            NVIC_DisableIRQ(TIMER0_IRQn);
-        default:
-            assert(false);
-    }
+    irqsrc src = static_cast<irqsrc>(num);
+    if (src == irqsrc::UART0)
+        irq = UART0_IRQn;
+    else if (src == irqsrc::CAN)
+        irq = CAN_IRQn;
+    else if (src >= irqsrc::TIMER0 && src < irqsrc::TIMER1) {
+        irq = TIMER0_IRQn;
+        status = --_group_ref[0];
+    } else if (src >= irqsrc::TIMER1 && src < irqsrc::TIMER2) {
+        irq = TIMER1_IRQn;
+        status = --_group_ref[1];
+    } else if (src >= irqsrc::TIMER2 && src < irqsrc::TIMER3) {
+        irq = TIMER2_IRQn;
+        status = --_group_ref[2];
+    } else if (src >= irqsrc::TIMER3) {
+        irq = TIMER3_IRQn;
+        status = --_group_ref[3];
+    } else
+        assert(false);
+
+    if (status <= 0)
+        /* Disable interrupt */
+        NVIC_DisableIRQ(irq);
 }
 
 void irqmgr::handle_int(int num)
@@ -104,9 +142,18 @@ void raise_int(int num)
 
 extern "C" void TIMER0_IRQHandler(void)
 {
-    if (TIM_GetIntStatus(LPC_TIM0, TIM_MR0_INT)== SET) {
+    if (TIM_GetIntStatus(LPC_TIM0, TIM_MR0_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM0, TIM_MR0_INT);
         raise_int(static_cast<int>(irqsrc::TIMER0));
+    } else if (TIM_GetIntStatus(LPC_TIM0, TIM_MR1_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM0, TIM_MR1_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER0) + 1);
+    } else if (TIM_GetIntStatus(LPC_TIM0, TIM_MR2_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM0, TIM_MR2_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER0) + 2);
+    } else if (TIM_GetIntStatus(LPC_TIM0, TIM_MR3_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM0, TIM_MR3_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER0) + 3);
     } else {
         assert(false);  // spurious
     }
@@ -114,17 +161,59 @@ extern "C" void TIMER0_IRQHandler(void)
 
 extern "C" void TIMER1_IRQHandler(void)
 {
-    raise_int(static_cast<int>(irqsrc::TIMER1));
+    if (TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER1));
+    } else if (TIM_GetIntStatus(LPC_TIM1, TIM_MR1_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM1, TIM_MR1_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER1) + 1);
+    } else if (TIM_GetIntStatus(LPC_TIM1, TIM_MR2_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM1, TIM_MR2_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER1) + 2);
+    } else if (TIM_GetIntStatus(LPC_TIM1, TIM_MR3_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM1, TIM_MR3_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER1) + 3);
+    } else {
+        assert(false);  // spurious
+    }
 }
 
 extern "C" void TIMER2_IRQHandler(void)
 {
-    raise_int(static_cast<int>(irqsrc::TIMER2));
+    if (TIM_GetIntStatus(LPC_TIM2, TIM_MR0_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM2, TIM_MR0_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER2));
+    } else if (TIM_GetIntStatus(LPC_TIM2, TIM_MR1_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM2, TIM_MR1_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER2) + 1);
+    } else if (TIM_GetIntStatus(LPC_TIM2, TIM_MR2_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM2, TIM_MR2_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER2) + 2);
+    } else if (TIM_GetIntStatus(LPC_TIM2, TIM_MR3_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM2, TIM_MR3_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER2) + 3);
+    } else {
+        assert(false);  // spurious
+    }
 }
 
 extern "C" void TIMER3_IRQHandler(void)
 {
-    raise_int(static_cast<int>(irqsrc::TIMER3));
+    if (TIM_GetIntStatus(LPC_TIM3, TIM_MR0_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM3, TIM_MR0_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER3));
+    } else if (TIM_GetIntStatus(LPC_TIM3, TIM_MR1_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM3, TIM_MR1_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER3) + 1);
+    } else if (TIM_GetIntStatus(LPC_TIM3, TIM_MR2_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM3, TIM_MR2_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER3) + 2);
+    } else if (TIM_GetIntStatus(LPC_TIM3, TIM_MR3_INT) == SET) {
+        TIM_ClearIntPending(LPC_TIM3, TIM_MR3_INT);
+        raise_int(static_cast<int>(irqsrc::TIMER3) + 3);
+    } else {
+        assert(false);  // spurious
+    }
 }
 
 extern "C" void CAN_IRQHandler(void)
@@ -155,37 +244,59 @@ TIM_MATCHCFG_Type gTIM_MatchConfigStruct = {
     MatchValue : 10
 };
 
-hwtmr::hwtmr(int &id, std::function<void()> delegate) : _id(id)
+hwtmr::hwtmr(int &id) : _id(id)
 {
-    int irq = static_cast<int>(irqsrc::TIMER0) + id;
-    irqmgr::get_instance().register_int(irq, delegate);
 }
 
 hwtmr::~hwtmr()
 {
-    int irq = static_cast<int>(irqsrc::TIMER0) + _id;
-    irqmgr::get_instance().unregister_int(irq);
 }
 
 void hwtmr::start(int msecs, std::function<void()> delegate)
 {
+    LPC_TIM_TypeDef *tim = nullptr;
     int irq = static_cast<int>(irqsrc::TIMER0) + _id;
     irqmgr::get_instance().update_int(irq, delegate);
 
-    // use channel 0, MR0
-    gTIM_MatchConfigStruct.MatchChannel = 0;
     // Set Match value, count value of base 10 (10 * 100uS = 1000 = 1ms --> 1 kHz)
     gTIM_MatchConfigStruct.MatchValue = 10 * msecs;
+    // select channel MRx
+    gTIM_MatchConfigStruct.MatchChannel = _id % 4;
+
+    switch(_id / 4) {
+        case 0:  // TIMER0 MR0-3
+            tim = LPC_TIM0;
+            break;
+        case 1:  // TIMER1 MR0-3
+            tim = LPC_TIM1;
+            break;
+        case 2:  // TIMER2 MR0-3
+            tim = LPC_TIM2;
+            break;
+        case 3:  // TIMER3 MR0-3
+            tim = LPC_TIM3;
+            break;
+        default:
+            assert(false);
+            break;
+    }
+
     // Set configuration for Tim_config and Tim_MatchConfig
-    TIM_Init(LPC_TIM0, TIM_TIMER_MODE, &gTIM_ConfigStruct);
-    TIM_ConfigMatch(LPC_TIM0, &gTIM_MatchConfigStruct);
-    // To start timer 0
-    TIM_Cmd(LPC_TIM0, ENABLE);
+    TIM_Init(tim, TIM_TIMER_MODE, &gTIM_ConfigStruct);
+    TIM_ConfigMatch(tim, &gTIM_MatchConfigStruct);
+    // To start timer
+    TIM_Cmd(tim, ENABLE);
 };
 
-void hwtmr::stop()
+void hwtmr::stop(bool force)
 {
-    TIM_Cmd(LPC_TIM0, DISABLE);
+    /* No need to disable the timer as it auto disables
+       when expired, but in some cases C level interrupt may be raised,
+       so unregister the handler to avoid signal propagation */
+    if (force) {
+        int irq = static_cast<int>(irqsrc::TIMER0) + _id;
+        irqmgr::get_instance().unregister_int(irq);
+    }
 };
 
 hwcan::hwcan(std::function<void(HWCAN_DAT &d)> handler)

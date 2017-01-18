@@ -66,7 +66,7 @@ void egos::initialize(int &argc, char **argv, int guard_period)
     typedef looper<locker, syncer<locker>> superloop;
 
     _main_looper = std::unique_ptr<superloop>(new superloop());
-    _timers = std::unique_ptr<timerpool>(new timerpool(16));
+    _timers = std::unique_ptr<timerpool>(new timerpool(egos::MAX_TMRS));
 
     {
         auto serp =

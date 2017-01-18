@@ -42,6 +42,8 @@ enum class comm_ports : uint8_t {
 
 class egos : public singleton<egos>, private watchdog::bark {
 
+    static const int MAX_TMRS = 16;
+
     std::unique_ptr<timerpool> _timers;
     std::unique_ptr<looper_if> _main_looper;
 

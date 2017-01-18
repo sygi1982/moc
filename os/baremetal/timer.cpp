@@ -30,8 +30,7 @@ timer::timer(int &id) : _id(id),
                         _is_async(false),
                         _priv_data(nullptr)
 {
-    _priv_data = static_cast<void *>(new hwtmr(_id,
-        [] () { ;} ));  // dummy handler
+    _priv_data = static_cast<void *>(new hwtmr(_id));
     assert(_priv_data);
 };
 
@@ -55,7 +54,7 @@ void timer::cancel_async()
     egos::prints("cancel_async\n");
     assert(_is_async);
     hwtmr *tmr = static_cast<hwtmr *>(_priv_data);
-    tmr->stop();
+    tmr->stop(true);
 };
 
 void timer::wait_sync(int msecs)
@@ -72,7 +71,7 @@ void timer::wait_sync(int msecs)
     while(!done)
         irqmgr::get_instance().wfi();
 
-    tmr->stop();
+    tmr->stop(false);
     _pool->try_return(this);
 };
 

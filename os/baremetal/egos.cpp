@@ -47,7 +47,7 @@ void egos::initialize(int &argc, char **argv, int guard_period)
 
     _main_looper = std::unique_ptr<superloop>(new superloop());
     irqmgr::get_instance().initialize();
-    _timers = std::unique_ptr<timerpool>(new timerpool(4));
+    _timers = std::unique_ptr<timerpool>(new timerpool(egos::MAX_TMRS));
 
     _serial_port = autoptr<port>(new serial_port("CAN0"));
     _can_port = autoptr<port>(new can_port("UART0"));
