@@ -19,9 +19,13 @@
 
 #include <functional>
 
+#include "irqmgr.hpp"
+
 namespace halapi {
 
-typedef unsigned char HWSER_DAT;
+struct HWSER_DAT : irqdat {
+    unsigned char data;
+};
 
 class hwser {
 

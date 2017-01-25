@@ -19,9 +19,16 @@
 
 #include <functional>
 
+#include "irqmgr.hpp"
+
 namespace halapi {
 
-typedef unsigned char HWCAN_DAT;
+struct HWCAN_DAT : irqdat {
+    unsigned int id;
+    unsigned char data[8];
+    unsigned char len;
+    unsigned char flags;
+};
 
 class hwcan {
 

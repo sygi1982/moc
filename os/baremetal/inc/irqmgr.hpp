@@ -35,10 +35,14 @@ enum class irqsrc : int {
     TIMER3 = 22
 };
 
-class irqmgr : public singleton<irqmgr> {
-    std::map<int, std::function<void()>> _handlers;
+struct irqdat {
+    int dat[0];
+};
 
-    void handle_int(int num);
+class irqmgr : public singleton<irqmgr> {
+    std::map<int, std::function<void(irqdat&)>> _handlers;
+
+    void handle_int(int num, irqdat& data);
 
     static const int MAX_GROUPS = 4;
 
@@ -51,9 +55,9 @@ public:
             _group_ref[i] = 0;
     }
 
-    void register_int(const int num, std::function<void()> handler);
+    void register_int(const int num, std::function<void(irqdat&)> handler);
 
-    void update_int(const int num, std::function<void()> handler);
+    void update_int(const int num, std::function<void(irqdat&)> handler);
 
     void unregister_int(const int num);
 
@@ -63,7 +67,7 @@ public:
 
     void wfi();
 
-    friend void raise_int(int num);
+    friend void raise_int(int num, irqdat& data);
 
 };
 

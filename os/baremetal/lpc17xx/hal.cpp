@@ -27,17 +27,18 @@
 #include "lpc17xx_can.h"
 #include "lpc17xx_timer.h"
 #include "lpc17xx_uart.h"
+#include "lpc17xx_pinsel.h"
 
 namespace halapi {
 
 /* Interrupt controller */
-void irqmgr::register_int(const int num, std::function<void()> handler)
+void irqmgr::register_int(const int num, std::function<void(irqdat&)> handler)
 {
     IRQn_Type irq = WDT_IRQn;
 
     assert(handler);
     _handlers.insert(std::pair<int,
-        std::function<void()>>(num, handler));
+        std::function<void(irqdat&)>>(num, handler));
     int status = -1;
 
     irqsrc src = static_cast<irqsrc>(num);
@@ -68,7 +69,7 @@ void irqmgr::register_int(const int num, std::function<void()> handler)
     }
 }
 
-void irqmgr::update_int(const int num, std::function<void()> handler)
+void irqmgr::update_int(const int num, std::function<void(irqdat&)> handler)
 {
     auto it = _handlers.find(num);
 
@@ -112,11 +113,11 @@ void irqmgr::unregister_int(const int num)
         NVIC_DisableIRQ(irq);
 }
 
-void irqmgr::handle_int(int num)
+void irqmgr::handle_int(int num, irqdat& data)
 {
     auto handler = _handlers.at(num);
     assert(handler);
-    handler();
+    handler(data);
 }
 
 void irqmgr::ints_ena()
@@ -135,25 +136,27 @@ void irqmgr::wfi()
 }
 
 /* This is irqmgr proxy function */
-void raise_int(int num)
+void raise_int(int num, irqdat& data)
 {
-    irqmgr::get_instance().handle_int(num);
+    irqmgr::get_instance().handle_int(num, data);
 }
 
 extern "C" void TIMER0_IRQHandler(void)
 {
+    irqdat data;
+
     if (TIM_GetIntStatus(LPC_TIM0, TIM_MR0_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM0, TIM_MR0_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER0));
+        raise_int(static_cast<int>(irqsrc::TIMER0), data);
     } else if (TIM_GetIntStatus(LPC_TIM0, TIM_MR1_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM0, TIM_MR1_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER0) + 1);
+        raise_int(static_cast<int>(irqsrc::TIMER0) + 1, data);
     } else if (TIM_GetIntStatus(LPC_TIM0, TIM_MR2_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM0, TIM_MR2_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER0) + 2);
+        raise_int(static_cast<int>(irqsrc::TIMER0) + 2, data);
     } else if (TIM_GetIntStatus(LPC_TIM0, TIM_MR3_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM0, TIM_MR3_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER0) + 3);
+        raise_int(static_cast<int>(irqsrc::TIMER0) + 3, data);
     } else {
         assert(false);  // spurious
     }
@@ -161,18 +164,20 @@ extern "C" void TIMER0_IRQHandler(void)
 
 extern "C" void TIMER1_IRQHandler(void)
 {
+    irqdat data;
+
     if (TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER1));
+        raise_int(static_cast<int>(irqsrc::TIMER1), data);
     } else if (TIM_GetIntStatus(LPC_TIM1, TIM_MR1_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM1, TIM_MR1_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER1) + 1);
+        raise_int(static_cast<int>(irqsrc::TIMER1) + 1, data);
     } else if (TIM_GetIntStatus(LPC_TIM1, TIM_MR2_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM1, TIM_MR2_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER1) + 2);
+        raise_int(static_cast<int>(irqsrc::TIMER1) + 2, data);
     } else if (TIM_GetIntStatus(LPC_TIM1, TIM_MR3_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM1, TIM_MR3_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER1) + 3);
+        raise_int(static_cast<int>(irqsrc::TIMER1) + 3, data);
     } else {
         assert(false);  // spurious
     }
@@ -180,18 +185,20 @@ extern "C" void TIMER1_IRQHandler(void)
 
 extern "C" void TIMER2_IRQHandler(void)
 {
+    irqdat data;
+
     if (TIM_GetIntStatus(LPC_TIM2, TIM_MR0_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM2, TIM_MR0_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER2));
+        raise_int(static_cast<int>(irqsrc::TIMER2), data);
     } else if (TIM_GetIntStatus(LPC_TIM2, TIM_MR1_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM2, TIM_MR1_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER2) + 1);
+        raise_int(static_cast<int>(irqsrc::TIMER2) + 1, data);
     } else if (TIM_GetIntStatus(LPC_TIM2, TIM_MR2_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM2, TIM_MR2_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER2) + 2);
+        raise_int(static_cast<int>(irqsrc::TIMER2) + 2, data);
     } else if (TIM_GetIntStatus(LPC_TIM2, TIM_MR3_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM2, TIM_MR3_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER2) + 3);
+        raise_int(static_cast<int>(irqsrc::TIMER2) + 3, data);
     } else {
         assert(false);  // spurious
     }
@@ -199,18 +206,20 @@ extern "C" void TIMER2_IRQHandler(void)
 
 extern "C" void TIMER3_IRQHandler(void)
 {
+    irqdat data;
+
     if (TIM_GetIntStatus(LPC_TIM3, TIM_MR0_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM3, TIM_MR0_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER3));
+        raise_int(static_cast<int>(irqsrc::TIMER3), data);
     } else if (TIM_GetIntStatus(LPC_TIM3, TIM_MR1_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM3, TIM_MR1_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER3) + 1);
+        raise_int(static_cast<int>(irqsrc::TIMER3) + 1, data);
     } else if (TIM_GetIntStatus(LPC_TIM3, TIM_MR2_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM3, TIM_MR2_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER3) + 2);
+        raise_int(static_cast<int>(irqsrc::TIMER3) + 2, data);
     } else if (TIM_GetIntStatus(LPC_TIM3, TIM_MR3_INT) == SET) {
         TIM_ClearIntPending(LPC_TIM3, TIM_MR3_INT);
-        raise_int(static_cast<int>(irqsrc::TIMER3) + 3);
+        raise_int(static_cast<int>(irqsrc::TIMER3) + 3, data);
     } else {
         assert(false);  // spurious
     }
@@ -218,12 +227,61 @@ extern "C" void TIMER3_IRQHandler(void)
 
 extern "C" void CAN_IRQHandler(void)
 {
-    raise_int(static_cast<int>(irqsrc::CAN));
+    /* Get CAN status */
+    int status = CAN_GetCTRLStatus(LPC_CAN1, CANCTRL_STS);
+    // check receive buffer status
+    if (status & 0x01) {
+        CAN_MSG_Type frame;
+        CAN_ReceiveMsg(LPC_CAN1, &frame);
+        HWCAN_DAT hwf;
+        hwf.id = frame.id;
+        hwf.len = frame.len;
+        hwf.data[0] = frame.dataA[0];
+        hwf.data[1] = frame.dataA[1];
+        hwf.data[2] = frame.dataA[2];
+        hwf.data[3] = frame.dataA[3];
+        hwf.data[4] = frame.dataB[0];
+        hwf.data[5] = frame.dataB[1];
+        hwf.data[6] = frame.dataB[2];
+        hwf.data[7] = frame.dataB[3];
+        hwf.flags = 0; // TODO: flags
+        raise_int(static_cast<int>(irqsrc::CAN), hwf);
+    }
 }
 
 extern "C" void UART0_IRQHandler(void)
 {
-    raise_int(static_cast<int>(irqsrc::UART0));
+    int status, tmp, tmp1;
+    HWSER_DAT hwf;
+
+    /* Determine the interrupt source */
+    status = UART_GetIntId(LPC_UART0);
+    tmp = status & UART_IIR_INTID_MASK;
+
+    // Receive Line Status
+    if (tmp == UART_IIR_INTID_RLS) {
+        // Check line status
+        tmp1 = UART_GetLineStatus(LPC_UART0);
+        // Mask out the Receive Ready and Transmit Holding empty status
+        tmp1 &= (UART_LSR_OE | UART_LSR_PE | UART_LSR_FE \
+                | UART_LSR_BI | UART_LSR_RXFE);
+        // If any error exist
+        if (tmp1) {
+            assert(false);
+        }
+    }
+
+    // Receive Data Available or Character time-out
+    if ((tmp == UART_IIR_INTID_RDA) || (tmp == UART_IIR_INTID_CTI)) {
+        int len = UART_Receive((LPC_UART_TypeDef *)LPC_UART0,
+            &hwf.data, 1, NONE_BLOCKING);
+        raise_int(static_cast<int>(irqsrc::UART0), hwf);
+    }
+
+    // Transmit Holding Empty
+    if (tmp == UART_IIR_INTID_THRE) {
+        // TODO: tx irq ?
+    }
 }
 
 /* Hardware timers */
@@ -256,7 +314,11 @@ void hwtmr::start(int msecs, std::function<void()> delegate)
 {
     LPC_TIM_TypeDef *tim = nullptr;
     int irq = static_cast<int>(irqsrc::TIMER0) + _id;
-    irqmgr::get_instance().update_int(irq, delegate);
+    auto tmr_handler = [delegate] (irqdat& data) {
+        /* irqdat is empty */
+        delegate();
+    };
+    irqmgr::get_instance().update_int(irq, tmr_handler);
 
     // Set Match value, count value of base 10 (10 * 100uS = 1000 = 1ms --> 1 kHz)
     gTIM_MatchConfigStruct.MatchValue = 10 * msecs;
@@ -301,34 +363,115 @@ void hwtmr::stop(bool force)
 
 hwcan::hwcan(std::function<void(HWCAN_DAT &d)> handler)
 {
-    auto irq_routine = [this, handler] () {
-        //TODO: call plat C function, read registers
-        HWCAN_DAT d;
-        handler(d);
+    auto irq_routine = [this, handler] (irqdat& data) {
+        HWCAN_DAT hwf = static_cast<HWCAN_DAT&>(data);
+        handler(hwf);
     };
 
-    irqmgr::get_instance().register_int(
-        static_cast<int>(irqsrc::CAN), irq_routine);
+    // TODO: baudrate, mode
+    CAN_Init(LPC_CAN1, 125000);
+
+    // Enable oper mode
+    CAN_ModeConfig(LPC_CAN1, CAN_OPERATING_MODE, ENABLE);
+
+    // Enable Interrupts
+    CAN_IRQCmd(LPC_CAN1, CANINT_RIE, ENABLE);
+    CAN_IRQCmd(LPC_CAN1, CANINT_TIE1, ENABLE);
+
+    CAN_SetAFMode(LPC_CANAF, CAN_Normal);
+
+    irqmgr::get_instance().register_int(static_cast<int>(irqsrc::CAN),
+        irq_routine);
 }
 
 hwcan::~hwcan()
 {
     irqmgr::get_instance().unregister_int(
         static_cast<int>(irqsrc::CAN));
+
+    // Disable oper mode
+    CAN_ModeConfig(LPC_CAN1, CAN_OPERATING_MODE, ENABLE);
+    // Disable Interrupts
+    CAN_IRQCmd(LPC_CAN1, CANINT_RIE, DISABLE);
+    CAN_IRQCmd(LPC_CAN1, CANINT_TIE1, DISABLE);
 }
 
-void hwcan::send(HWCAN_DAT &d)
+void hwcan::send(HWCAN_DAT &hwf)
 {
-    //TODO: call plat C function
+    CAN_MSG_Type frame;
+
+    // TODO: format from flags
+    frame.format = EXT_ID_FORMAT;
+    frame.id = hwf.id;
+    frame.len = hwf.len;
+    frame.type = DATA_FRAME;
+    frame.dataA[0] = hwf.data[0];
+    frame.dataA[1] = hwf.data[1];
+    frame.dataA[2] = hwf.data[2];
+    frame.dataA[3] = hwf.data[3];
+    frame.dataB[0] = hwf.data[4];
+    frame.dataB[1] = hwf.data[5];
+    frame.dataB[2] = hwf.data[6];
+    frame.dataB[3] = hwf.data[7];
+
+    CAN_SendMsg(LPC_CAN1, &frame);
 }
 
 hwser::hwser(std::function<void(HWSER_DAT &d)> handler)
 {
-    auto irq_routine = [this, handler] () {
-        //TODO: call plat C function, read registers
-        HWSER_DAT d;
-        handler(d);
+    auto irq_routine = [this, handler] (irqdat& data) {
+        HWSER_DAT hwf = static_cast<HWSER_DAT&>(data);
+        handler(hwf);
     };
+
+    // UART Configuration structure variable
+    UART_CFG_Type UARTConfigStruct;
+    // UART FIFO configuration Struct variable
+    UART_FIFO_CFG_Type UARTFIFOConfigStruct;
+    // Pin configuration for UART0
+    PINSEL_CFG_Type PinCfg;
+    /*
+     * Initialize UART0 pin connect
+     */
+    PinCfg.Funcnum = 1;
+    PinCfg.OpenDrain = 0;
+    PinCfg.Pinmode = 0;
+    PinCfg.Pinnum = 2;
+    PinCfg.Portnum = 0;
+    PINSEL_ConfigPin(&PinCfg);
+    PinCfg.Pinnum = 3;
+    PINSEL_ConfigPin(&PinCfg);
+    /* Initialize UART Configuration parameter structure to default state:
+     * Baudrate = 9600bps
+     * 8 data bit
+     * 1 Stop bit
+     * None parity
+     */
+    // TODO: baudrate, mode
+    UART_ConfigStructInit(&UARTConfigStruct);
+
+    // Initialize UART0 peripheral with given to corresponding parameter
+    UART_Init((LPC_UART_TypeDef *)LPC_UART0, &UARTConfigStruct);
+
+    /* Initialize FIFOConfigStruct to default state:
+     *                 - FIFO_DMAMode = DISABLE
+     *                 - FIFO_Level = UART_FIFO_TRGLEV0
+     *                 - FIFO_ResetRxBuf = ENABLE
+     *                 - FIFO_ResetTxBuf = ENABLE
+     *                 - FIFO_State = ENABLE
+     */
+    UART_FIFOConfigStructInit(&UARTFIFOConfigStruct);
+
+    // Initialize FIFO for UART0 peripheral
+    UART_FIFOConfig((LPC_UART_TypeDef *)LPC_UART0, &UARTFIFOConfigStruct);
+
+    // Enable UART Transmit
+    UART_TxCmd((LPC_UART_TypeDef *)LPC_UART0, ENABLE);
+
+    /* Enable UART Rx interrupt */
+    UART_IntConfig((LPC_UART_TypeDef *)LPC_UART0, UART_INTCFG_RBR, ENABLE);
+    /* Enable UART line status interrupt */
+    UART_IntConfig((LPC_UART_TypeDef *)LPC_UART0, UART_INTCFG_RLS, ENABLE);
 
     irqmgr::get_instance().register_int(
         static_cast<int>(irqsrc::UART0), irq_routine);
@@ -338,11 +481,24 @@ hwser::~hwser()
 {
     irqmgr::get_instance().unregister_int(
         static_cast<int>(irqsrc::UART0));
+
+    // wait for current transmission complete - THR must be empty
+    while (UART_CheckBusy((LPC_UART_TypeDef *)LPC_UART0));
+    // DeInitialize UART0 peripheral
+    UART_DeInit((LPC_UART_TypeDef *)LPC_UART0);
 }
 
-void hwser::send(HWSER_DAT &d)
+void hwser::send(HWSER_DAT &hwf)
 {
-    //TODO: call plat C function
+    /* Temporarily lock out UART transmit interrupts during this
+       read so the UART transmit interrupt won't cause problems
+       with the index values */
+    UART_IntConfig((LPC_UART_TypeDef *)LPC_UART0,
+        UART_INTCFG_THRE, DISABLE);
+    UART_Send((LPC_UART_TypeDef *)LPC_UART0, (uint8_t *)&hwf.data,
+        1, NONE_BLOCKING);
+    UART_IntConfig((LPC_UART_TypeDef *)LPC_UART0,
+        UART_INTCFG_THRE, ENABLE);
 }
 
 }

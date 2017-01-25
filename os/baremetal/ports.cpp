@@ -27,10 +27,9 @@ bool serial_port::init()
 {
     egos::prints("serial init\n");
 
-    auto ser_handler = [this] (HWSER_DAT &d) {
+    auto ser_handler = [this] (HWSER_DAT &hwf) {
         SER_FRAME sf;
-        sf._data = d;
-        // TODO: make frame constructor to pass data
+        sf._data = hwf.data;
         this->_rcv->frame_received(this, sf);
     };
     _priv_data = static_cast<void *>(new hwser(ser_handler));
@@ -51,11 +50,10 @@ bool can_port::init()
 {
     egos::prints("can init\n");
 
-    auto can_handler = [this] (HWCAN_DAT &d) {
+    auto can_handler = [this] (HWCAN_DAT &hwf) {
         CAN_FRAME cf;
-        cf._id = d;
+        cf._id = hwf.id;
         // TODO: pass is data & flags
-        // TODO: make frame constructor to pass data
         this->_rcv->frame_received(this, cf);
     };
     _priv_data = static_cast<void *>(new hwcan(can_handler));
@@ -76,7 +74,9 @@ bool serial_port::send_frame(frame &f)
 {
     SER_FRAME &sf = static_cast<SER_FRAME&>(f);
     hwser *ser = static_cast<hwser *>(_priv_data);
-    ser->send(sf._data);
+    HWSER_DAT hwf;
+    hwf.data = sf._data;
+    ser->send(hwf);
 
     return true;
 }
@@ -85,8 +85,9 @@ bool can_port::send_frame(frame &f)
 {
     CAN_FRAME &cf = static_cast<CAN_FRAME&>(f);
     hwcan *can = static_cast<hwcan *>(_priv_data);
+    HWCAN_DAT hwf;
     // TODO: pass is data & flags
-    //can->send(0);
+    can->send(hwf);
 
     return true;
 }
