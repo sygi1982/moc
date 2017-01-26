@@ -20,6 +20,7 @@
 #include "unistd.h"
 #include "fcntl.h"
 #include "sys/poll.h"
+#include <termios.h>
 
 #include "egos.hpp"
 #include "ports.hpp"
@@ -44,7 +45,17 @@ bool serial_port::init()
         return false;
     }
 
-    // TODO: configure serial
+    // TODO: baudrate?
+    struct termios options;
+    tcgetattr(fd, &options);
+    cfsetispeed(&options, B9600);
+    cfsetospeed(&options, B9600);
+    options.c_cflag |= (CLOCAL | CREAD);
+    options.c_cflag &= ~PARENB;
+    options.c_cflag |= CSTOPB;
+    options.c_cflag &= ~CSIZE; /* Mask the character size bits */
+    options.c_cflag |= CS8;    /* Select 8 data bits */
+    tcsetattr(fd, TCSANOW, &options);
 
     sp = new serp;
     assert(sp);
@@ -116,13 +127,14 @@ void serial_port::deinit()
 
 bool can_port::init()
 {
+    // TODO: attach to socketcan port
     egos::prints("can init\n");
     return true;
 }
 
 bool can_port::send_frame(frame &f)
 {
-    // TODO: use write
+    // TODO: use socketcan like api
     egos::prints("can port send\n");
 
     return true;
@@ -130,6 +142,7 @@ bool can_port::send_frame(frame &f)
 
 void can_port::deinit()
 {
+    // TODO: detach from socketcan port
     egos::prints("can deinit\n");
 }
 
