@@ -53,7 +53,9 @@ bool can_port::init()
     auto can_handler = [this] (HWCAN_DAT &hwf) {
         CAN_FRAME cf;
         cf._id = hwf.id;
-        // TODO: pass is data & flags
+        for (int i = 0; i < hwf.len; i++)
+            cf._data.push_back(hwf.data[i]);
+        cf._flags = hwf.flags;
         this->_rcv->frame_received(this, cf);
     };
     _priv_data = static_cast<void *>(new hwcan(_baudrate, can_handler));
@@ -86,7 +88,11 @@ bool can_port::send_frame(frame &f)
     CAN_FRAME &cf = static_cast<CAN_FRAME&>(f);
     hwcan *can = static_cast<hwcan *>(_priv_data);
     HWCAN_DAT hwf;
-    // TODO: pass is data & flags
+    hwf.id = cf._id;
+    for (int i = 0; i < cf._data.size(); i++)
+        hwf.data[i] = cf._data[i];
+    hwf.len = cf._data.size();
+    hwf.flags = cf._flags;
     can->send(hwf);
 
     return true;
