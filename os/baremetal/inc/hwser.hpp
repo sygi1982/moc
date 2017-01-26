@@ -30,7 +30,7 @@ struct HWSER_DAT : irqdat {
 class hwser {
 
 public:
-    hwser(std::function<void(HWSER_DAT &d)> handler);
+    hwser(int baudrate, std::function<void(HWSER_DAT &d)> handler);
 
     ~hwser();
 

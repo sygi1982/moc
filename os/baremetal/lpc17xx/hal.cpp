@@ -275,7 +275,8 @@ extern "C" void UART0_IRQHandler(void)
     if ((tmp == UART_IIR_INTID_RDA) || (tmp == UART_IIR_INTID_CTI)) {
         int len = UART_Receive((LPC_UART_TypeDef *)LPC_UART0,
             &hwf.data, 1, NONE_BLOCKING);
-        raise_int(static_cast<int>(irqsrc::UART0), hwf);
+        if (len)
+            raise_int(static_cast<int>(irqsrc::UART0), hwf);
     }
 
     // Transmit Holding Empty
@@ -361,15 +362,15 @@ void hwtmr::stop(bool force)
     }
 };
 
-hwcan::hwcan(std::function<void(HWCAN_DAT &d)> handler)
+hwcan::hwcan(int baudrate, std::function<void(HWCAN_DAT &d)> handler)
 {
     auto irq_routine = [this, handler] (irqdat& data) {
         HWCAN_DAT hwf = static_cast<HWCAN_DAT&>(data);
         handler(hwf);
     };
 
-    // TODO: baudrate, mode
-    CAN_Init(LPC_CAN1, 125000);
+    // TODO: mode
+    CAN_Init(LPC_CAN1, baudrate * 1000);
 
     // Enable oper mode
     CAN_ModeConfig(LPC_CAN1, CAN_OPERATING_MODE, ENABLE);
@@ -417,7 +418,7 @@ void hwcan::send(HWCAN_DAT &hwf)
     CAN_SendMsg(LPC_CAN1, &frame);
 }
 
-hwser::hwser(std::function<void(HWSER_DAT &d)> handler)
+hwser::hwser(int baudrate, std::function<void(HWSER_DAT &d)> handler)
 {
     auto irq_routine = [this, handler] (irqdat& data) {
         HWSER_DAT hwf = static_cast<HWSER_DAT&>(data);
@@ -447,8 +448,10 @@ hwser::hwser(std::function<void(HWSER_DAT &d)> handler)
      * 1 Stop bit
      * None parity
      */
-    // TODO: baudrate, mode
+    // TODO: mode
     UART_ConfigStructInit(&UARTConfigStruct);
+    UARTConfigStruct.Baud_rate = baudrate;
+    UARTConfigStruct.Stopbits = UART_STOPBIT_2;
 
     // Initialize UART0 peripheral with given to corresponding parameter
     UART_Init((LPC_UART_TypeDef *)LPC_UART0, &UARTConfigStruct);

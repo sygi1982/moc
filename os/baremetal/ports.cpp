@@ -32,7 +32,7 @@ bool serial_port::init()
         sf._data = hwf.data;
         this->_rcv->frame_received(this, sf);
     };
-    _priv_data = static_cast<void *>(new hwser(ser_handler));
+    _priv_data = static_cast<void *>(new hwser(_baudrate, ser_handler));
     assert(_priv_data);
 
     return _priv_data != nullptr;
@@ -56,7 +56,7 @@ bool can_port::init()
         // TODO: pass is data & flags
         this->_rcv->frame_received(this, cf);
     };
-    _priv_data = static_cast<void *>(new hwcan(can_handler));
+    _priv_data = static_cast<void *>(new hwcan(_baudrate, can_handler));
     assert(_priv_data);
 
     return _priv_data != nullptr;
@@ -91,6 +91,5 @@ bool can_port::send_frame(frame &f)
 
     return true;
 }
-
 
 }

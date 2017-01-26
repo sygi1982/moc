@@ -33,7 +33,7 @@ struct HWCAN_DAT : irqdat {
 class hwcan {
 
 public:
-    hwcan(std::function<void(HWCAN_DAT &d)> handler);
+    hwcan(int baudrate, std::function<void(HWCAN_DAT &d)> handler);
 
     ~hwcan();
 
