@@ -16,6 +16,9 @@
  */
 #include <thread>
 #include <cassert>
+#include <map>
+#include <utility>
+#include <initializer_list>
 
 #include "unistd.h"
 #include "fcntl.h"
@@ -36,20 +39,33 @@ struct serp {
 
 bool serial_port::init()
 {
-    egos::prints("serial init: %s\n", _name.c_str());
+    std::map<int, int> baudrates {
+        std::make_pair(9600, B9600),
+        std::make_pair(19200, B19200),
+        std::make_pair(38400, B38400),
+        std::make_pair(57600, B57600),
+        std::make_pair(115200, B115200)
+    };
     int fd;
     serp *sp;
 
+    egos::prints("serial init: %s\n", _name.c_str());
     if ((fd = open(_name.c_str(), O_RDWR)) < 0) {
         assert(false);
         return false;
     }
 
-    // TODO: baudrate?
+    int br = B9600;
+    auto it = baudrates.find(_baudrate);
+    if (it != baudrates.end())
+        br = it->second;
+    else
+        egos::prints("provided value not known, using default baudrate!\n");
+
     struct termios options;
     tcgetattr(fd, &options);
-    cfsetispeed(&options, B9600);
-    cfsetospeed(&options, B9600);
+    cfsetispeed(&options, br);
+    cfsetospeed(&options, br);
     options.c_cflag |= (CLOCAL | CREAD);
     options.c_cflag &= ~PARENB;
     options.c_cflag |= CSTOPB;
