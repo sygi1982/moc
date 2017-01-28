@@ -21,16 +21,23 @@
 #include <initializer_list>
 
 #include "unistd.h"
+#include "string.h"
 #include "fcntl.h"
 #include "sys/poll.h"
 #include <termios.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <linux/can.h>
+#include <linux/can/raw.h>
 
 #include "egos.hpp"
 #include "ports.hpp"
 
 namespace osapi {
 
-struct serp {
+// TODO: common functions for serial/can ?
+
+struct port_ctx {
     int trxfd;
     int exitfds[2];
     std::thread *handler;
@@ -47,11 +54,11 @@ bool serial_port::init()
         std::make_pair(115200, B115200)
     };
     int fd;
-    serp *sp;
+    port_ctx *sp;
 
-    egos::prints("serial init: %s\n", _name.c_str());
+    egos::prints("serial init: %s baudrate: %u\n",
+        _name.c_str(), _baudrate);
     if ((fd = open(_name.c_str(), O_RDWR)) < 0) {
-        assert(false);
         return false;
     }
 
@@ -73,7 +80,7 @@ bool serial_port::init()
     options.c_cflag |= CS8;    /* Select 8 data bits */
     tcsetattr(fd, TCSANOW, &options);
 
-    sp = new serp;
+    sp = new port_ctx;
     assert(sp);
     sp->trxfd = fd;
     sp->exit = false;
@@ -93,7 +100,7 @@ bool serial_port::init()
                     char buf[1024];
 
                     int ret = read(sp->trxfd, buf, sizeof(buf));
-                    egos::prints("received (%d) data\n", ret);
+                    egos::prints("serial received (%d) data\n", ret);
 
                     SER_FRAME sf;
                     for(int i = 0; i <= ret; i++) {
@@ -108,6 +115,7 @@ bool serial_port::init()
             }
         });
 
+    // TODO: detach from thread ?
     _priv_data = static_cast<void *>(sp);
 
     return true;
@@ -115,7 +123,7 @@ bool serial_port::init()
 
 bool serial_port::send_frame(frame &f)
 {
-    serp *sp = static_cast<serp *>(_priv_data);
+    port_ctx *sp = static_cast<port_ctx *>(_priv_data);
     SER_FRAME &sf = static_cast<SER_FRAME&>(f);
 
     int ret = write(sp->trxfd,
@@ -127,7 +135,7 @@ bool serial_port::send_frame(frame &f)
 
 void serial_port::deinit()
 {
-    serp *sp = static_cast<serp *>(_priv_data);
+    port_ctx *sp = static_cast<port_ctx *>(_priv_data);
 
     egos::prints("serial deinit\n");
     sp->exit = true;
@@ -143,23 +151,105 @@ void serial_port::deinit()
 
 bool can_port::init()
 {
-    // TODO: attach to socketcan port
-    egos::prints("can init\n");
+    struct ifreq ifr;
+    struct sockaddr_can addr;
+    int fd;
+    port_ctx *cp;
+
+    egos::prints("can init: %s baudrate: %u\n",
+        _name.c_str(), _baudrate);
+    /* open socket */
+    if ((fd = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
+        return false;
+    }
+
+    addr.can_family = AF_CAN;
+    strcpy(ifr.ifr_name, _name.c_str());
+
+    if (ioctl(fd, SIOCGIFINDEX, &ifr) < 0) {
+        return false;
+    }
+
+    addr.can_ifindex = ifr.ifr_ifindex;
+    fcntl(fd, F_SETFL, O_NONBLOCK);
+
+    if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        return false;
+    }
+
+    // TODO: configure baudrate ?
+
+    cp = new port_ctx;
+    assert(cp);
+    cp->trxfd = fd;
+    cp->exit = false;
+    assert(!pipe(cp->exitfds));
+
+    cp->handler = new std::thread([this, cp]() {
+            struct pollfd pfds[2];
+
+            while(!cp->exit) {
+                pfds[0].fd = cp->trxfd;
+                pfds[0].events = POLLIN;
+                pfds[1].fd = cp->exitfds[1];
+                pfds[1].events = POLLHUP;
+
+                poll(pfds, 2, -1);
+                if (pfds[0].revents & POLLIN) {
+                    struct can_frame hwf;
+
+                    int ret = read(cp->trxfd, &hwf, sizeof(hwf));
+                    assert(ret == sizeof(hwf));
+                    egos::prints("can received (%d) data\n", ret);
+
+                    CAN_FRAME cf;
+                    for(int i = 0; i <= ret; i++) {
+                        // TODO: copy data from can_frame
+                        this->_rcv->frame_received(this, cf);
+                    }
+                } else if (pfds[1].revents & POLLHUP) {
+                    close(cp->exitfds[1]);
+                    egos::prints("closing can port\n");
+                    continue;
+                }
+            }
+        });
+
+    // TODO: detach from thread ?
+    _priv_data = static_cast<void *>(cp);
+
     return true;
 }
 
 bool can_port::send_frame(frame &f)
 {
-    // TODO: use socketcan like api
-    egos::prints("can port send\n");
+    port_ctx *cp = static_cast<port_ctx *>(_priv_data);
+    CAN_FRAME &cf = static_cast<CAN_FRAME&>(f);
+    struct can_frame hwf;
+
+    // TODO: copy data to can_frame
+    int ret = write(cp->trxfd,
+        (const void *)(&hwf), sizeof(hwf));
+    assert(ret == sizeof(hwf));
+    egos::prints("can port send (%d)\n", ret);
 
     return true;
 }
 
 void can_port::deinit()
 {
-    // TODO: detach from socketcan port
+    port_ctx *cp = static_cast<port_ctx *>(_priv_data);
+
     egos::prints("can deinit\n");
+    cp->exit = true;
+    close(cp->exitfds[0]);
+    cp->handler->join();
+    close(cp->trxfd);
+    egos::prints("can closed\n");
+
+    delete cp->handler;
+    delete cp;
+    _priv_data = static_cast<void *>(nullptr);
 }
 
 }
