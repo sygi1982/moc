@@ -19,6 +19,7 @@
 #include <map>
 #include <utility>
 #include <initializer_list>
+#include <functional>
 
 #include "unistd.h"
 #include "string.h"
@@ -35,14 +36,61 @@
 
 namespace osapi {
 
-// TODO: common functions for serial/can ?
-
 struct port_ctx {
     int trxfd;
     int exitfds[2];
     std::thread *handler;
     bool exit;
 };
+
+static port_ctx* port_spawn(int fd,
+    std::function<void(int fd)> received,
+    std::function<void()> closed)
+{
+    port_ctx *ctx;
+
+    ctx = new port_ctx;
+    assert(ctx);
+    ctx->trxfd = fd;
+    ctx->exit = false;
+    assert(!pipe(ctx->exitfds));
+
+    ctx->handler = new std::thread([ctx, received, closed]() {
+            struct pollfd pfds[2];
+
+            while(!ctx->exit) {
+                pfds[0].fd = ctx->trxfd;
+                pfds[0].events = POLLIN;
+                pfds[1].fd = ctx->exitfds[1];
+                pfds[1].events = POLLHUP;
+
+                poll(pfds, 2, -1);
+                if (pfds[0].revents & POLLIN) {
+                    assert(received);
+                    received(ctx->trxfd);
+                } else if (pfds[1].revents & POLLHUP) {
+                    close(ctx->exitfds[1]);
+                    assert(closed);
+                    closed();
+                    continue;
+                }
+            }
+        });
+
+    // TODO: detach from thread ?
+    return ctx;
+}
+
+static void port_cleanup(port_ctx *ctx)
+{
+    ctx->exit = true;
+    close(ctx->exitfds[0]);
+    ctx->handler->join();
+    close(ctx->trxfd);
+
+    delete ctx->handler;
+    delete ctx;
+}
 
 bool serial_port::init()
 {
@@ -80,42 +128,24 @@ bool serial_port::init()
     options.c_cflag |= CS8;    /* Select 8 data bits */
     tcsetattr(fd, TCSANOW, &options);
 
-    sp = new port_ctx;
-    assert(sp);
-    sp->trxfd = fd;
-    sp->exit = false;
-    assert(!pipe(sp->exitfds));
+    sp = port_spawn(fd,
+        [this] (int fd) {
+            char buf[1024];
 
-    sp->handler = new std::thread([this, sp]() {
-            struct pollfd pfds[2];
+            int ret = read(fd, buf, sizeof(buf));
+            egos::prints("serial received (%d) data\n", ret);
 
-            while(!sp->exit) {
-                pfds[0].fd = sp->trxfd;
-                pfds[0].events = POLLIN;
-                pfds[1].fd = sp->exitfds[1];
-                pfds[1].events = POLLHUP;
-
-                poll(pfds, 2, -1);
-                if (pfds[0].revents & POLLIN) {
-                    char buf[1024];
-
-                    int ret = read(sp->trxfd, buf, sizeof(buf));
-                    egos::prints("serial received (%d) data\n", ret);
-
-                    SER_FRAME sf;
-                    for(int i = 0; i <= ret; i++) {
-                        sf._data = buf[i];
-                        this->_rcv->frame_received(this, sf);
-                    }
-                } else if (pfds[1].revents & POLLHUP) {
-                    close(sp->exitfds[1]);
-                    egos::prints("closing serial port\n");
-                    continue;
-                }
+            SER_FRAME sf;
+            for(int i = 0; i <= ret; i++) {
+                sf._data = buf[i];
+                this->_rcv->frame_received(this, sf);
             }
+        },
+        [] () {
+            egos::prints("closing serial port\n");
         });
 
-    // TODO: detach from thread ?
+    assert(sp);
     _priv_data = static_cast<void *>(sp);
 
     return true;
@@ -135,17 +165,9 @@ bool serial_port::send_frame(frame &f)
 
 void serial_port::deinit()
 {
-    port_ctx *sp = static_cast<port_ctx *>(_priv_data);
-
     egos::prints("serial deinit\n");
-    sp->exit = true;
-    close(sp->exitfds[0]);
-    sp->handler->join();
-    close(sp->trxfd);
+    port_cleanup(static_cast<port_ctx *>(_priv_data));
     egos::prints("serial closed\n");
-
-    delete sp->handler;
-    delete sp;
     _priv_data = static_cast<void *>(nullptr);
 }
 
@@ -179,43 +201,25 @@ bool can_port::init()
 
     // TODO: configure baudrate ?
 
-    cp = new port_ctx;
-    assert(cp);
-    cp->trxfd = fd;
-    cp->exit = false;
-    assert(!pipe(cp->exitfds));
+    cp = port_spawn(fd,
+        [this] (int fd) {
+            struct can_frame hwf;
 
-    cp->handler = new std::thread([this, cp]() {
-            struct pollfd pfds[2];
+            int ret = read(fd, &hwf, sizeof(hwf));
+            assert(ret == sizeof(hwf));
+            egos::prints("can received (%d) data\n", ret);
 
-            while(!cp->exit) {
-                pfds[0].fd = cp->trxfd;
-                pfds[0].events = POLLIN;
-                pfds[1].fd = cp->exitfds[1];
-                pfds[1].events = POLLHUP;
-
-                poll(pfds, 2, -1);
-                if (pfds[0].revents & POLLIN) {
-                    struct can_frame hwf;
-
-                    int ret = read(cp->trxfd, &hwf, sizeof(hwf));
-                    assert(ret == sizeof(hwf));
-                    egos::prints("can received (%d) data\n", ret);
-
-                    CAN_FRAME cf;
-                    for(int i = 0; i <= ret; i++) {
-                        // TODO: copy data from can_frame
-                        this->_rcv->frame_received(this, cf);
-                    }
-                } else if (pfds[1].revents & POLLHUP) {
-                    close(cp->exitfds[1]);
-                    egos::prints("closing can port\n");
-                    continue;
-                }
+            CAN_FRAME cf;
+            for(int i = 0; i <= ret; i++) {
+                // TODO: copy data from can_frame
+                this->_rcv->frame_received(this, cf);
             }
+        },
+        [] () {
+            egos::prints("closing can port\n");
         });
 
-    // TODO: detach from thread ?
+    assert(cp);
     _priv_data = static_cast<void *>(cp);
 
     return true;
@@ -238,17 +242,9 @@ bool can_port::send_frame(frame &f)
 
 void can_port::deinit()
 {
-    port_ctx *cp = static_cast<port_ctx *>(_priv_data);
-
     egos::prints("can deinit\n");
-    cp->exit = true;
-    close(cp->exitfds[0]);
-    cp->handler->join();
-    close(cp->trxfd);
+    port_cleanup(static_cast<port_ctx *>(_priv_data));
     egos::prints("can closed\n");
-
-    delete cp->handler;
-    delete cp;
     _priv_data = static_cast<void *>(nullptr);
 }
 
