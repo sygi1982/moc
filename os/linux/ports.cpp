@@ -136,7 +136,7 @@ bool serial_port::init()
             egos::prints("serial received (%d) data\n", ret);
 
             SER_FRAME sf;
-            for(int i = 0; i <= ret; i++) {
+            for(int i = 0; i < ret; i++) {
                 sf._data = buf[i];
                 this->_rcv->frame_received(this, sf);
             }
@@ -210,10 +210,11 @@ bool can_port::init()
             egos::prints("can received (%d) data\n", ret);
 
             CAN_FRAME cf;
-            for(int i = 0; i <= ret; i++) {
-                // TODO: copy data from can_frame
-                this->_rcv->frame_received(this, cf);
+            cf._id = hwf.can_id;
+            for(int i = 0; i < hwf.can_dlc; i++) {
+                cf._data.push_back(hwf.data[i]);
             }
+            this->_rcv->frame_received(this, cf);
         },
         [] () {
             egos::prints("closing can port\n");
@@ -231,7 +232,11 @@ bool can_port::send_frame(frame &f)
     CAN_FRAME &cf = static_cast<CAN_FRAME&>(f);
     struct can_frame hwf;
 
-    // TODO: copy data to can_frame
+    hwf.can_id = cf._id;
+    for(int i = 0; i < cf._data.size(); i++) {
+        hwf.data[i] = cf._data[i];
+    }
+    hwf.can_dlc = cf._data.size();
     int ret = write(cp->trxfd,
         (const void *)(&hwf), sizeof(hwf));
     assert(ret == sizeof(hwf));
