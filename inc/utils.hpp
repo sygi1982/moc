@@ -59,7 +59,7 @@ protected:
 
 public:
     singleton(singleton const&) = delete;
-    void operator=(singleton const&) = delete;
+    singleton& operator=(singleton const&) = delete;
 
     static Ttype& get_instance()
     {
