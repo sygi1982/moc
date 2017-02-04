@@ -16,25 +16,19 @@
  */
 #include <sys/stat.h>
 #include <stdio.h>
-
-#include "target.h"
-#include "compiler.h"
-#include "ft245.h"
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+extern void dbg_channel_init();
+extern int dbg_channel_write(const char *, int);
+extern int dbg_channel_read(char *, int);
+
 void _llprint(const char *str)
 {
-    int i = 0;
-
-    while (str[i]) {
-        if (ft245_write(str[i]) == TRUE)
-            i++;
-        else
-            continue;
-    }
+    dbg_channel_write(str, strlen(str));
 }
 
 int _kill (int pid, int sig)
@@ -82,22 +76,13 @@ int _isatty (int fd)
 
 int _fstat (int fd, struct stat *st)
 {
-    ft245_init();
+    dbg_channel_init();
     return 0;
 }
 
 int _write(int fd, char *ptr, int len)
 {
-    int i = 0;
-
-    while (i < len) {
-        char val = ptr[i];
-        if (ft245_write(val) == TRUE)
-            i++;
-        else
-            continue;
-    }
-
+    dbg_channel_write(ptr, len);
     return len;
 }
 
@@ -108,17 +93,9 @@ int _lseek (int file, int ptr, int dir)
 
 int _read (int fd, char *ptr, int len)
 {
-    int i = 0;
+    dbg_channel_read(ptr, len);
 
-    while (i < len) {
-        char *pval = &ptr[i];
-        if (ft245_read((unsigned char *)pval) == TRUE)
-            i++;
-        else
-            continue;
-    }
-
-    return 0;
+    return len;
 }
 
 int _close (int file)

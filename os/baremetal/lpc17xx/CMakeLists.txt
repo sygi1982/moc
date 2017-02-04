@@ -6,19 +6,20 @@ set(C_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/syscalls.c
 	#    ${CMAKE_CURRENT_SOURCE_DIR}/target.c
     ${CMAKE_CURRENT_SOURCE_DIR}/system_LPC17xx.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/ft245.c
+	#    ${CMAKE_CURRENT_SOURCE_DIR}/ft245.c
 )
 
 set(CPP_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/cpp_hooks.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/startup_lpc176x.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/hal.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dbg_channel.cpp
 )
 
 set(PLAT_SRCS ${C_SRCS} ${CPP_SRCS})
 
 # local includes
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
 # CMSIS includes
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cmsis/Drivers/include)

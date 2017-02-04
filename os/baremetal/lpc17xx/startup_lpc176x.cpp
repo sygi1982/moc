@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#include "target.h"
+//#include "target.h"
 #include "system_lpc17xx.h"
 
 //*****************************************************************************
