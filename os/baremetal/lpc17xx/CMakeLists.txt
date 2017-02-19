@@ -4,9 +4,9 @@ project(PlatLib)
 
 set(C_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/syscalls.c
-	#    ${CMAKE_CURRENT_SOURCE_DIR}/target.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/target.c
     ${CMAKE_CURRENT_SOURCE_DIR}/system_LPC17xx.c
-	#    ${CMAKE_CURRENT_SOURCE_DIR}/ft245.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/ft245.c
 )
 
 set(CPP_SRCS
@@ -88,9 +88,16 @@ add_custom_target(flash_images ALL DEPENDS ${EXE_NAME}.bin ${EXE_NAME}.hex
     WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 
 set(DEPLOY_TOOL ${CMAKE_SOURCE_DIR}/tools/lpc21isp)
+set(ISP_BAUDRATE 115200)
+set(ISP_XTAL 12000)
 
 add_custom_target(deploy DEPENDS ${EXE_NAME}.bin
-    COMMAND ${DEPLOY_TOOL} -bin ${EXE_NAME}.bin -control -wipe /dev/$$ISP_PORT 115200 12000
+    COMMAND ${DEPLOY_TOOL} -bin ${EXE_NAME}.bin -control -wipe /dev/$$ISP_PORT ${ISP_BAUDRATE} ${ISP_XTAL}
     WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
     COMMENT "Flashing binary image !")
+
+add_custom_target(devtest
+    COMMAND ${DEPLOY_TOOL} -control -detectonly /dev/$$ISP_PORT ${ISP_BAUDRATE} ${ISP_XTAL}
+    WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+    COMMENT "Testing target exists !")
 
