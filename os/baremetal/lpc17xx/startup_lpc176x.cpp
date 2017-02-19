@@ -8,7 +8,6 @@
 extern "C" {
 #endif
 
-//#include "target.h"
 #include "system_lpc17xx.h"
 
 //*****************************************************************************
@@ -294,7 +293,6 @@ ResetISR(void) {
     //
     __libc_init_array();
 #endif
-//    target_reset();
     SystemInit();
 
     main();

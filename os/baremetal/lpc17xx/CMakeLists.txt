@@ -4,9 +4,7 @@ project(PlatLib)
 
 set(C_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/syscalls.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/target.c
     ${CMAKE_CURRENT_SOURCE_DIR}/system_LPC17xx.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/ft245.c
 )
 
 set(CPP_SRCS
@@ -17,9 +15,6 @@ set(CPP_SRCS
 )
 
 set(PLAT_SRCS ${C_SRCS} ${CPP_SRCS})
-
-# local includes
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
 # CMSIS includes
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cmsis/Drivers/include)
