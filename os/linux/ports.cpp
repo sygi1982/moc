@@ -77,7 +77,6 @@ static port_ctx* port_spawn(int fd,
             }
         });
 
-    // TODO: detach from thread ?
     return ctx;
 }
 
