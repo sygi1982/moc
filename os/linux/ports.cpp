@@ -62,7 +62,7 @@ static port_ctx* port_spawn(int fd,
                 pfds[0].fd = ctx->trxfd;
                 pfds[0].events = POLLIN;
                 pfds[1].fd = ctx->exitfds[1];
-                pfds[1].events = POLLHUP;
+                pfds[1].events = 0;
 
                 poll(pfds, 2, -1);
                 if (pfds[0].revents & POLLIN) {
