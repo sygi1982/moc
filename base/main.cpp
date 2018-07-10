@@ -72,6 +72,7 @@ int main(int argc, char **argv)
     os_api->introduce_self();
 
     auto serp = os_api->get_port(comm_ports::SERIAL_PORT);
+    assert(serp->is_ready());
     auto ser_handler = [&os_api] (frame &f) {
         egos::prints(" serial frame received %d!\n", static_cast<SER_FRAME *>(&f)->_data);
         autoitem item(new delayed_work(1));
@@ -83,6 +84,7 @@ int main(int argc, char **argv)
     serp->send_frame(sf);
 
     auto canp = os_api->get_port(comm_ports::CAN_PORT);
+    assert(canp->is_ready());
     auto can_handler = [&os_api] (frame &f) {
         egos::prints(" can frame received %d!\n", static_cast<CAN_FRAME *>(&f)->_id);
         autoitem item(new delayed_work(2));
